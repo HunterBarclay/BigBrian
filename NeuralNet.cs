@@ -10,14 +10,14 @@ dCost/dBias = (deriv of activation func of value before activation) (2) (activat
 namespace BigBrian {
     public class NeuralNet {
 
-        public static double TrimMod = 0.01;
+        public static double TrimMod = 0.003;
 
         public double Cost { get; set; }
         
         private int[] structure;
         public int[] Structure { get => structure; }
 
-        private Layer[] layers;
+        public Layer[] layers;
 
         public NeuralNet(int[] structure) {
             this.structure = structure;
@@ -40,7 +40,7 @@ namespace BigBrian {
 
         public double[] Passthrough(double[] initLayer) {
             for (int i = 0; i < layers.Length; i++) {
-                initLayer = layers[i].Passthrough(initLayer);
+                initLayer = layers[i].Passthrough(initLayer, i != layers.Length - 1); // Wtf fuck calculus
             }
             return initLayer;
         }
@@ -90,6 +90,7 @@ namespace BigBrian {
             public double[][] weights;
             public double biasDelta;
             public double[][] weightDeltas;
+            public double[][] gammas;
 
             public List<DeltaCache> Deltas = new List<DeltaCache>();
             public TrainingDataDump trainingMeta;
@@ -125,7 +126,7 @@ namespace BigBrian {
                 bias = (random.NextDouble() * 1.0) - 0.5; // -0.5 >= x < 0.5
             }
 
-            public double[] Passthrough(double[] previousNodes) {
+            public double[] Passthrough(double[] previousNodes, bool useBias = true) {
                 trainingMeta.FedData = previousNodes;
                 trainingMeta.BeforeActivation = new double[size];
                 // trainingMeta.AfterActivation = new double[size];
@@ -135,7 +136,7 @@ namespace BigBrian {
                     for (int j = 0; j < previousNodes.Length; j++) {
                         nodes[i] += weights[j][i] * previousNodes[j];
                     }
-                    nodes[i] += bias;
+                    nodes[i] += useBias ? bias : 0;
                     trainingMeta.BeforeActivation[i] = nodes[i];
                     nodes[i] = Activation(nodes[i]);
                     // trainingMeta.AfterActivation[i] = nodes[i];
@@ -147,10 +148,13 @@ namespace BigBrian {
 
                 // Weights
                 weightDeltas = new double[weights.Length][];
+                gammas = new double[weights.Length][];
                 for (int i = 0; i < weightDeltas.Length; i++) {
                     weightDeltas[i] = new double[size];
+                    gammas[i] = new double[size];
                     for (int j = 0; j < output.Length; j++) {
-                        weightDeltas[i][j] = (1.0 / (double)output.Length) * 2 * (output[j] - target[j]) * ActivationDer(trainingMeta.BeforeActivation[j]) * trainingMeta.FedData[i];
+                        gammas[i][j] = (1.0 / (double)output.Length) * 2 * (output[j] - target[j]) * ActivationDer(trainingMeta.BeforeActivation[j]);
+                        weightDeltas[i][j] = gammas[i][j] * trainingMeta.FedData[i];
                     }
                 }
 
@@ -158,21 +162,30 @@ namespace BigBrian {
                 for (int j = 0; j < output.Length; j++) {
                     biasDelta += (1.0 / (double)output.Length) * 2 * (output[j] - target[j]) * ActivationDer(trainingMeta.BeforeActivation[j]);
                 }
+                // for (int i = 0; i < weights.Length; i++) {
+                //     for (int j = 0; j < output.Length; j++) {
+                //         biasDelta += gammas[i][j];
+                //     }
+                // }
                 // biasDelta /= output.Length; // Average out the bias delta cuz idfk what to do
             }
 
             public void CalculateDeltas(Layer foreLayer) {
                 // Weights
                 weightDeltas = new double[weights.Length][];
+                gammas = new double[weights.Length][];
                 for (int i = 0; i < weightDeltas.Length; i++) {
                     weightDeltas[i] = new double[size];
+                    gammas[i] = new double[size];
                     for (int j = 0; j < size; j++) {
                         weightDeltas[i][j] = 0;
+                        gammas[i][j] = 0;
                         for (int k = 0; k < foreLayer.size; k++) {
-                            weightDeltas[i][j] += (foreLayer.weightDeltas[j][k] / foreLayer.trainingMeta.FedData[k])
+                            gammas[i][j] += foreLayer.gammas[j][k] * foreLayer.weights[j][k] * ActivationDer(trainingMeta.BeforeActivation[j]);
+                            weightDeltas[i][j] += foreLayer.gammas[j][k] * foreLayer.weights[j][k]
                                 * ActivationDer(trainingMeta.BeforeActivation[j]) * trainingMeta.FedData[i];
                         }
-                        weightDeltas[i][j] /= foreLayer.size;
+                        // weightDeltas[i][j] /= foreLayer.size;
                     }
                 }
 
@@ -183,7 +196,7 @@ namespace BigBrian {
                         double tempBiasDelta = 0.0;
                         for (int k = 0; k < foreLayer.size; k++) {
                             tempBiasDelta += (foreLayer.weightDeltas[j][k] / foreLayer.trainingMeta.FedData[k])
-                                * ActivationDer(trainingMeta.BeforeActivation[j]);
+                                * foreLayer.weights[j][k] * ActivationDer(trainingMeta.BeforeActivation[j]);
                         }
                         biasDelta += tempBiasDelta;// / foreLayer.size;
                     }

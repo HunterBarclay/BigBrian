@@ -6,8 +6,8 @@ namespace BigBrian {
 
         private StreamWriter writer;
 
-        public CSVFile(string header) {
-            InitFile();
+        public CSVFile(string name, string header) {
+            InitFile(name);
             Log(header);
         }
 
@@ -20,8 +20,8 @@ namespace BigBrian {
             writer.Flush();
         }
 
-        public void InitFile() {
-            var fs = File.Create($"logs\\{String.Format("{0:u}", DateTime.Now).Replace(' ', '_').Replace(':', '-')}.csv");
+        public void InitFile(string name) {
+            var fs = File.Create($"logs\\{name}_{String.Format("{0:u}", DateTime.Now).Replace(' ', '_').Replace(':', '-')}.csv");
             writer = new StreamWriter(fs);
         }
     }
