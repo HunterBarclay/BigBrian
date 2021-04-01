@@ -156,11 +156,9 @@ namespace BigBrian {
 
                 // Bias
                 for (int j = 0; j < output.Length; j++) {
-                    for (int i = 0; i < weights.Length; i++) {
-                        biasDelta += (1.0 / (double)output.Length) * 2 * (output[j] - target[j]) * ActivationDer(trainingMeta.BeforeActivation[j]);
-                    }
+                    biasDelta += (1.0 / (double)output.Length) * 2 * (output[j] - target[j]) * ActivationDer(trainingMeta.BeforeActivation[j]);
                 }
-                biasDelta /= output.Length; // Average out the bias delta cuz idfk what to do
+                // biasDelta /= output.Length; // Average out the bias delta cuz idfk what to do
             }
 
             public void CalculateDeltas(Layer foreLayer) {
@@ -171,9 +169,10 @@ namespace BigBrian {
                     for (int j = 0; j < size; j++) {
                         weightDeltas[i][j] = 0;
                         for (int k = 0; k < foreLayer.size; k++) {
-                            weightDeltas[i][j] += foreLayer.weightDeltas[j][k] * trainingMeta.FedData[i];
+                            weightDeltas[i][j] += (foreLayer.weightDeltas[j][k] / foreLayer.trainingMeta.FedData[k])
+                                * ActivationDer(trainingMeta.BeforeActivation[j]) * trainingMeta.FedData[i];
                         }
-                        // weightDeltas[i][j] /= foreLayer.size;
+                        weightDeltas[i][j] /= foreLayer.size;
                     }
                 }
 
@@ -183,7 +182,8 @@ namespace BigBrian {
                     for (int i = 0; i < weights.Length; i++) {
                         double tempBiasDelta = 0.0;
                         for (int k = 0; k < foreLayer.size; k++) {
-                            tempBiasDelta += foreLayer.weightDeltas[j][k];
+                            tempBiasDelta += (foreLayer.weightDeltas[j][k] / foreLayer.trainingMeta.FedData[k])
+                                * ActivationDer(trainingMeta.BeforeActivation[j]);
                         }
                         biasDelta += tempBiasDelta;// / foreLayer.size;
                     }

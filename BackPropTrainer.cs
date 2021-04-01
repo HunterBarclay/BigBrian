@@ -29,6 +29,10 @@ namespace BigBrian {
                     Console.WriteLine($"Calculation {Calculations}: [Cost] {billy.Cost}");
                 billy.CalculateDeltas(output, dataPoint.output);
                 avgCost += billy.Cost;
+
+                if (Calculations % 16 == 0) {
+                    int a = 0;
+                }
             }
             avgCost /= testData.Length;
         }

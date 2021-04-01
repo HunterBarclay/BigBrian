@@ -9,7 +9,7 @@ namespace BigBrian
         static NeuralNet n;
         public static bool Done = false;
 
-        static int[] structure = new int[] { 2, 1 };
+        static int[] structure = new int[] { 2, 2, 1 };
 
         static (double[], double[])[] data = new (double[], double[])[] {
             (new double[]{ 0.0, 0.0 }, new double[]{ 0.0 }),
@@ -31,17 +31,18 @@ namespace BigBrian
             }
 
             int interations = 500;
-            var trainer = new BackPropTrainer(structure, newData.ToArray());
+            var trainer = new BackPropTrainer(structure, data);
             var progressTracker = new Thread(() => {
-                while (!Done) {
-                    Thread.Sleep(750);
-                    int percent = (int)(100 * ((double)trainer.Modifications / (double)interations));
-                    if (!Done) {
-                        Console.Clear();
-                        Console.WriteLine($"Progress => {percent}%");
+                try {
+                    while (!Done) {
+                        Thread.Sleep(750);
+                        int percent = (int)(100 * ((double)trainer.Modifications / (double)interations));
+                        if (!Done) {
+                            Console.Clear();
+                            Console.WriteLine($"Progress => {percent}%");
+                        }
                     }
-                }
-                    
+                } catch (Exception e) { } // Whoop... fuck
             });
             progressTracker.Start();
             trainer.Train(interations, false);
