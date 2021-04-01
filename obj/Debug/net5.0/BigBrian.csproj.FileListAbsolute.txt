@@ -1,0 +1,16 @@
+C:\Users\hunte\git\BigBrian\bin\Debug\net5.0\BigBrian.exe
+C:\Users\hunte\git\BigBrian\bin\Debug\net5.0\BigBrian.deps.json
+C:\Users\hunte\git\BigBrian\bin\Debug\net5.0\BigBrian.runtimeconfig.json
+C:\Users\hunte\git\BigBrian\bin\Debug\net5.0\BigBrian.runtimeconfig.dev.json
+C:\Users\hunte\git\BigBrian\bin\Debug\net5.0\BigBrian.dll
+C:\Users\hunte\git\BigBrian\bin\Debug\net5.0\ref\BigBrian.dll
+C:\Users\hunte\git\BigBrian\bin\Debug\net5.0\BigBrian.pdb
+C:\Users\hunte\git\BigBrian\obj\Debug\net5.0\BigBrian.csprojAssemblyReference.cache
+C:\Users\hunte\git\BigBrian\obj\Debug\net5.0\BigBrian.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\hunte\git\BigBrian\obj\Debug\net5.0\BigBrian.AssemblyInfoInputs.cache
+C:\Users\hunte\git\BigBrian\obj\Debug\net5.0\BigBrian.AssemblyInfo.cs
+C:\Users\hunte\git\BigBrian\obj\Debug\net5.0\BigBrian.csproj.CoreCompileInputs.cache
+C:\Users\hunte\git\BigBrian\obj\Debug\net5.0\BigBrian.dll
+C:\Users\hunte\git\BigBrian\obj\Debug\net5.0\ref\BigBrian.dll
+C:\Users\hunte\git\BigBrian\obj\Debug\net5.0\BigBrian.pdb
+C:\Users\hunte\git\BigBrian\obj\Debug\net5.0\BigBrian.genruntimeconfig.cache
