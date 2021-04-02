@@ -21,7 +21,9 @@ namespace BigBrian {
         }
 
         public void InitFile(string name) {
-            var fs = File.Create($"logs\\{name}_{String.Format("{0:u}", DateTime.Now).Replace(' ', '_').Replace(':', '-')}.csv");
+            string path = $"logs\\{name}_data.csv";
+            // string path = $"logs\\{name}_{String.Format("{0:u}", DateTime.Now).Replace(' ', '_').Replace(':', '-')}.csv";
+            var fs = File.Create(path);
             writer = new StreamWriter(fs);
         }
     }

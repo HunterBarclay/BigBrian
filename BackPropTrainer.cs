@@ -6,10 +6,14 @@ namespace BigBrian {
         private (double[] input, double[] output)[] testData;
         private NeuralNet billy;
 
+        public const double CostThreshold = 0.02;
+
         public int Calculations { get; private set; }
         public int Modifications { get; private set; }
 
         private CSVFile deltaLog, valueLog;
+
+        private double BestTotalCost = double.MaxValue;
 
         public BackPropTrainer(int[] structure, (double[] input, double[] output)[] testData) {
             this.testData = testData;
@@ -23,68 +27,75 @@ namespace BigBrian {
                     header += $",w{i+1}_{x}";
                 }
             }
+            header += ",cost";
 
             deltaLog = new CSVFile("delta", header);
             valueLog = new CSVFile("value", header);
         }
 
-        public void TestDataSet(bool verbose) {
-            avgCost = 0.0;
+        public double TestDataSet(bool verbose) {
+            double dataSetCost = 0.0;
             foreach (var dataPoint in testData) {
                 var output = billy.Passthrough(dataPoint.input);
                 Calculations++;
                 billy.CalculateCost(output, dataPoint.output);
 
-                // log.Log($"{dataPoint.input[0]},{dataPoint.input[1]},{output[0]},{dataPoint.output[0]},{billy.Cost}");
-
-                if (verbose)
-                    Console.WriteLine($"Calculation {Calculations}: [Cost] {billy.Cost}");
-                billy.CalculateDeltas(output, dataPoint.output);
-                avgCost += billy.Cost;
-
-                string deltaData = $"{Calculations}";
-                string valueData = $"{Calculations}";
-                for (int i = 0; i < billy.layers.Length; i++) {
-                    deltaData += $",{billy.layers[i].biasDelta}";
-                    valueData += $",{billy.layers[i].bias}";
-                    for (int x = 0; x < billy.layers[i].weights.Length * billy.layers[i].weights[0].Length; x++) {
-                        deltaData += $",{billy.layers[i].weightDeltas[x/billy.layers[i].weights.Length][x%billy.layers[i].weights[0].Length]}";
-                        valueData += $",{billy.layers[i].weights[x/billy.layers[i].weights.Length][x%billy.layers[i].weights[0].Length]}";
+                if (verbose) {
+                    string result = $"Calculation {Calculations}: [";
+                    foreach (var x in dataPoint.input) {
+                        result += $"{x}, ";
                     }
+                    result = result.Substring(0, result.Length - 2);
+                    result += "] => [";
+                    foreach (var x in dataPoint.output) {
+                        result += $"{x}, ";
+                    }
+                    result = result.Substring(0, result.Length - 2);
+                    result += "] [";
+                    foreach (var x in output) {
+                        result += $"{x}, ";
+                    }
+                    result = result.Substring(0, result.Length - 2);
+                    result += "]";
+                    Console.WriteLine(result);
                 }
-                deltaLog.Log(deltaData);
-                valueLog.Log(valueData);
+                billy.CalculateDeltas(output, dataPoint.output);
+                dataSetCost += billy.Cost;
+
+                if (Calculations % 100 == 0) {
+
+                    string deltaData = $"{Calculations}";
+                    string valueData = $"{Calculations}";
+                    for (int i = 0; i < billy.layers.Length; i++) {
+                        deltaData += $",{billy.layers[i].biasDelta}";
+                        valueData += $",{billy.layers[i].bias}";
+                        for (int x = 0; x < billy.layers[i].weights.Length * billy.layers[i].weights[0].Length; x++) {
+                            deltaData += $",{billy.layers[i].weightDeltas[x/billy.layers[i].weights[0].Length][x%billy.layers[i].weights[0].Length]}";
+                            valueData += $",{billy.layers[i].weights[x/billy.layers[i].weights[0].Length][x%billy.layers[i].weights[0].Length]}";
+                        }
+                    }
+                    deltaLog.Log(deltaData + $",{billy.Cost}");
+                    valueLog.Log(valueData + $",{billy.Cost}");
+
+                }
 
                 if (Calculations % 16 == 0) {
                     int a = 0;
                 }
             }
-            avgCost /= testData.Length;
+            if (dataSetCost < BestTotalCost)
+                BestTotalCost = dataSetCost;
+            return dataSetCost;
         }
 
-        double avgCost = 0.0;
-        double deltaAvgCost = 0.0;
-
         public void Train(int iterations, bool verbose) {
-
-            double lastAvgCost = avgCost;
-            double lastDeltaAvgCost = deltaAvgCost;
-
+            double c = 0;
             for (int i = 0; i < iterations; i++) {
 
-                TestDataSet(verbose);
-                deltaAvgCost = Math.Abs(avgCost - lastAvgCost);
+                c = TestDataSet(verbose);
 
-                // if (i > 1) {
-                //     if (deltaAvgCost > lastDeltaAvgCost) {
-                //         NeuralNet.TrimMod *= -0.999;
-                //     } else {
-                //         NeuralNet.TrimMod *= 0.999;
-                //     }
-                // }
-                
-                lastDeltaAvgCost = deltaAvgCost;
-                lastAvgCost = avgCost;
+                if (c <= CostThreshold)
+                    break;
 
                 // Apply deltas
                 billy.ApplyDeltas(true);
@@ -97,6 +108,8 @@ namespace BigBrian {
             Console.WriteLine("=====End Result=====\n");
             TestDataSet(true);
             Console.WriteLine($"Modifications {Modifications}");
+            Console.WriteLine($"Best Cost: {BestTotalCost}");
+            Console.WriteLine($"Current Cost: {c}");
         }
 
     }

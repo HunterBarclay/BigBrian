@@ -5,6 +5,9 @@ using System.Collections.Generic;
 Cost = (activation - desired output)^2
 dCost/dWeight = (activation of prev layer) (deriv of activation func of value before activation) (2) (activation - desired output)
 dCost/dBias = (deriv of activation func of value before activation) (2) (activation - desired output)
+
+TODO: Is there a bias per layer or bias per node??????
+
 */
 
 namespace BigBrian {
@@ -13,6 +16,9 @@ namespace BigBrian {
         public static double TrimMod = 0.003;
 
         public double Cost { get; set; }
+
+        // public Func<double, double> Activation;
+        // public Func<double, double> ActivationDer; // TODO
         
         private int[] structure;
         public int[] Structure { get => structure; }
@@ -248,8 +254,14 @@ namespace BigBrian {
                     Deltas.Clear();
             }
 
-            public double Activation(double a) => (Math.Pow(Math.E, a) - Math.Pow(Math.E, -a)) / (Math.Pow(Math.E, a) + Math.Pow(Math.E, -a));
-            public double ActivationDer(double a) => 1 - Math.Pow(Activation(a), 2);
+            public double Activation(double a) => TanH(a); // Sigmoid(a);
+            public double ActivationDer(double a) => TanHDer(a); // SigmoidDer(a);
+
+            public static double TanH(double a) => (Math.Pow(Math.E, a) - Math.Pow(Math.E, -a)) / (Math.Pow(Math.E, a) + Math.Pow(Math.E, -a));
+            public static double TanHDer(double a) => 1 - Math.Pow(TanH(a), 2);
+
+            public static double Sigmoid(double a) => 1 / (1 + Math.Pow(Math.E, -a));
+            public static double SigmoidDer(double a) => Sigmoid(a) * (1 - Sigmoid(a));
         }
 
         public struct TrainingDataDump {

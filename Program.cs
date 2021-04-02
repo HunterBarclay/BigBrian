@@ -9,13 +9,13 @@ namespace BigBrian
         static NeuralNet n;
         public static bool Done = false;
 
-        static int[] structure = new int[] { 2, 2, 2, 1 };
+        static int[] structure = new int[] { 2, 4, 4, 1 };
 
         static (double[], double[])[] data = new (double[], double[])[] {
             (new double[]{ 0.0, 0.0 }, new double[]{ 0.0 }),
-            (new double[]{ 0.0, 1.0 }, new double[]{ 1.0 }),
-            (new double[]{ 1.0, 0.0 }, new double[]{ 1.0 }),
-            (new double[]{ 1.0, 1.0 }, new double[]{ 0.0 })
+            (new double[]{ 0.0, 1.0 }, new double[]{ 0.0 }),
+            (new double[]{ 1.0, 0.0 }, new double[]{ 0.0 }),
+            (new double[]{ 1.0, 1.0 }, new double[]{ 1.0 })
         };
 
         static void Main(string[] args)
@@ -30,16 +30,16 @@ namespace BigBrian
                 newData.Add((new double[]{x, y}, new double[]{output}));
             }
 
-            int interations = 10000;
+            int interations = 1000000;
             var trainer = new BackPropTrainer(structure, data);
             var progressTracker = new Thread(() => {
                 try {
                     while (!Done) {
-                        Thread.Sleep(750);
-                        int percent = (int)(100 * ((double)trainer.Modifications / (double)interations));
+                        Thread.Sleep(1000);
+                        double percent = (100 * ((double)trainer.Modifications / (double)interations));
                         if (!Done) {
-                            Console.Clear();
-                            Console.WriteLine($"Progress => {percent}%");
+                            // Console.Clear();
+                            Console.WriteLine($"Progress => {percent.ToString().Substring(0, 5)}%");
                         }
                     }
                 } catch (Exception e) { } // Whoop... fuck
