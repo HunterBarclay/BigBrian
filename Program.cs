@@ -9,13 +9,17 @@ namespace BigBrian
         static NeuralNet n;
         public static bool Done = false;
 
-        static int[] structure = new int[] { 2, 4, 4, 1 };
+        static int[] structure = new int[] { 1, 3, 3, 1 };
 
+        // static (double[], double[])[] data = new (double[], double[])[] {
+        //     (new double[]{ 0.0, 0.0 }, new double[]{ 0.0 }),
+        //     (new double[]{ 0.0, 1.0 }, new double[]{ 1.0 }),
+        //     (new double[]{ 1.0, 0.0 }, new double[]{ 1.0 }),
+        //     (new double[]{ 1.0, 1.0 }, new double[]{ 1.0 })
+        // };
         static (double[], double[])[] data = new (double[], double[])[] {
-            (new double[]{ 0.0, 0.0 }, new double[]{ 0.0 }),
-            (new double[]{ 0.0, 1.0 }, new double[]{ 0.0 }),
-            (new double[]{ 1.0, 0.0 }, new double[]{ 0.0 }),
-            (new double[]{ 1.0, 1.0 }, new double[]{ 1.0 })
+            (new double[]{ 0.0 }, new double[]{ 1.0 }),
+            (new double[]{ 1.0 }, new double[]{ 0.0 })
         };
 
         static void Main(string[] args)
@@ -30,7 +34,7 @@ namespace BigBrian
                 newData.Add((new double[]{x, y}, new double[]{output}));
             }
 
-            int interations = 1000000;
+            int interations = 100000;
             var trainer = new BackPropTrainer(structure, data);
             var progressTracker = new Thread(() => {
                 try {

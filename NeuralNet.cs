@@ -91,10 +91,10 @@ namespace BigBrian {
             private int weightsPerNode;
             public int WeightsPerNode { get => weightsPerNode; }
 
-            public double bias;
+            public double[] biases;
             public double[] nodes;
             public double[][] weights;
-            public double biasDelta;
+            public double[] biasDeltas;
             public double[][] weightDeltas;
             public double[][] gammas;
 
@@ -126,10 +126,13 @@ namespace BigBrian {
                 for (int i = 0; i < weightsPerNode; i++) {
                     weights[i] = new double[size];
                     for (int j = 0; j < size; j++) {
-                        weights[i][j] = random.NextDouble() - 0.5; // -0.5 >= x < 0.5
+                        weights[i][j] = (random.NextDouble() * 20) - 10; // -0.5 >= x < 0.5
                     }
                 }
-                bias = (random.NextDouble() * 1.0) - 0.5; // -0.5 >= x < 0.5
+                biases = new double[size];
+                for (int i = 0; i < biases.Length; i++) {
+                    biases[i] = (random.NextDouble() * 20) - 10; // -0.5 >= x < 0.5
+                }
             }
 
             public double[] Passthrough(double[] previousNodes, bool useBias = true) {
@@ -142,7 +145,7 @@ namespace BigBrian {
                     for (int j = 0; j < previousNodes.Length; j++) {
                         nodes[i] += weights[j][i] * previousNodes[j];
                     }
-                    nodes[i] += useBias ? bias : 0;
+                    nodes[i] += useBias ? biases[i] : 0;
                     trainingMeta.BeforeActivation[i] = nodes[i];
                     nodes[i] = Activation(nodes[i]);
                     // trainingMeta.AfterActivation[i] = nodes[i];
@@ -165,8 +168,9 @@ namespace BigBrian {
                 }
 
                 // Bias
+                biasDeltas = new double[biases.Length];
                 for (int j = 0; j < output.Length; j++) {
-                    biasDelta += (1.0 / (double)output.Length) * 2 * (output[j] - target[j]) * ActivationDer(trainingMeta.BeforeActivation[j]);
+                    biasDeltas[j] = (1.0 / (double)output.Length) * 2 * (output[j] - target[j]) * ActivationDer(trainingMeta.BeforeActivation[j]);
                 }
                 // for (int i = 0; i < weights.Length; i++) {
                 //     for (int j = 0; j < output.Length; j++) {
@@ -196,7 +200,7 @@ namespace BigBrian {
                 }
 
                 // Bias
-                biasDelta = 0;
+                biasDeltas = new double[biases.Length];
                 for (int j = 0; j < size; j++) {
                     for (int i = 0; i < weights.Length; i++) {
                         double tempBiasDelta = 0.0;
@@ -204,14 +208,14 @@ namespace BigBrian {
                             tempBiasDelta += (foreLayer.weightDeltas[j][k] / foreLayer.trainingMeta.FedData[k])
                                 * foreLayer.weights[j][k] * ActivationDer(trainingMeta.BeforeActivation[j]);
                         }
-                        biasDelta += tempBiasDelta;// / foreLayer.size;
+                        biasDeltas[j] = tempBiasDelta;// / foreLayer.size;
                     }
                 }
-                biasDelta /= size; // Average out the bias delta cuz idfk what to do
+                // biasDelta /= size; // Average out the bias delta cuz idfk what to do
             }
 
             public void CacheDeltas() {
-                Deltas.Add(new DeltaCache() { biasDelta = this.biasDelta, weightsDelta = this.weightDeltas });
+                Deltas.Add(new DeltaCache() { biasDeltas = this.biasDeltas, weightsDelta = this.weightDeltas });
             }
 
             public void ApplyDeltas(bool clearCache) {
@@ -222,40 +226,41 @@ namespace BigBrian {
                         dW[x][y] = 0.0;
                     }
                 }
-                double dB = 0.0;
+                double[] dB = new double[size];
 
                 // Sum
                 foreach (var deltaSet in Deltas) {
-                    for (int x = 0; x < weightDeltas.Length; x++) {
-                        for (int y = 0; y < weightDeltas[x].Length; y++) {
+                    for (int y = 0; y < size; y++) {
+                            for (int x = 0; x < weightDeltas.Length; x++) {
                             dW[x][y] += deltaSet.weightsDelta[x][y];
                         }
+                        dB[y] += deltaSet.biasDeltas[y];
                     }
-                    dB += deltaSet.biasDelta;
                 }
 
                 // Average
-                for (int x = 0; x < weightDeltas.Length; x++) {
-                    for (int y = 0; y < weightDeltas[x].Length; y++) {
-                        dW[x][y] /= Deltas.Count;
+                for (int x = 0; x < size; x++) {
+                    for (int y = 0; y < weightDeltas.Length; y++) {
+                        dW[y][x] /= Deltas.Count;
                     }
+                    dB[x] /= Deltas.Count;
                 }
-                dB /= Deltas.Count;
+                
 
                 // Apply
-                for (int x = 0; x < weightDeltas.Length; x++) {
-                    for (int y = 0; y < weightDeltas[x].Length; y++) {
-                        weights[x][y] -= dW[x][y] * NeuralNet.TrimMod; // TODO: Prob adjust trim mod based on reaction to cost after applying deltas
+                for (int x = 0; x < size; x++) {
+                    for (int y = 0; y < weightDeltas.Length; y++) {
+                        weights[y][x] -= dW[y][x] * NeuralNet.TrimMod; // TODO: Prob adjust trim mod based on reaction to cost after applying deltas
                     }
+                    biases[x] -= dB[x] * NeuralNet.TrimMod;
                 }
-                bias -= dB * NeuralNet.TrimMod;
 
                 if (clearCache)
                     Deltas.Clear();
             }
 
-            public double Activation(double a) => TanH(a); // Sigmoid(a);
-            public double ActivationDer(double a) => TanHDer(a); // SigmoidDer(a);
+            public double Activation(double a) => Sigmoid(a);
+            public double ActivationDer(double a) => SigmoidDer(a);
 
             public static double TanH(double a) => (Math.Pow(Math.E, a) - Math.Pow(Math.E, -a)) / (Math.Pow(Math.E, a) + Math.Pow(Math.E, -a));
             public static double TanHDer(double a) => 1 - Math.Pow(TanH(a), 2);
@@ -271,7 +276,7 @@ namespace BigBrian {
         }
 
         public struct DeltaCache {
-            public double biasDelta;
+            public double[] biasDeltas;
             public double[][] weightsDelta;
         }
 
