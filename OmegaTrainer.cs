@@ -19,7 +19,7 @@ namespace BigBrian.v2 {
 
     public class OmegaTrainer {
 
-        public const double DELTA_ADJUSTMENT = 5;
+        public const double DELTA_ADJUSTMENT = 1;
         public TestCase[] Data;
         public Network TargetNetwork;
 
@@ -32,8 +32,9 @@ namespace BigBrian.v2 {
             Data = data;
         }
 
-        public void Test(bool printImprovement) {
+        public void Test(bool printImprovement, bool printResults) {
             double cost = 0;
+            
             foreach (var d in Data) {
                 string o = $"    IN: [ {d.inputs[0]}";
                 foreach (var a in d.inputs.Skip(1)) { o += $", {a}"; }
@@ -46,11 +47,14 @@ namespace BigBrian.v2 {
                 for (int i = 0; i < d.outputs.Length; i++) {
                     cost += Math.Pow(d.outputs[i] - actual[i], 2);
                 }
-                // Console.WriteLine(o);
+                if (printResults)
+                    Console.WriteLine(o);
             }
-            if (printImprovement)
-                Console.WriteLine($" Improvement -> {LastCost - cost}");
-            LastCost = cost;
+            if (printImprovement) {
+                Console.WriteLine($" Improvement -> {LastCost - cost}\n Cost -> {cost}");
+                LastCost = cost;
+            }
+            // LastCost = cost;
             // Console.WriteLine($"\n\n Cost -> {cost}\n\n");
             ApplyGradient();
         }
@@ -160,86 +164,119 @@ namespace BigBrian.v2 {
             return deriv;
         }
 
-        public class Network {
-            public int[] Structure;
-            public Layer[] Layers;
+        
+    }
 
-            public Network(int[] structure) {
-                Structure = structure;
-                Init();
-            }
+    public struct NetworkData {
+        public int[] Structure;
+        public double[][][] Weights;
+        public double[] Biases;
+    }
 
-            private void Init() {
-                Layers = new Layer[Structure.Length - 1];
-                for (int l = 0; l < Structure.Length - 1; l++) {
-                    Layers[l] = new Layer(new int[] { Structure[l], Structure[l + 1] }, Sigmoid, SigmoidDer);
-                }
-            }
+    public class Network {
+        public int[] Structure;
+        public Layer[] Layers;
 
-            public double[] Calculate(double[] input) {
-                for (int l = 0; l < Layers.Length; ++l) {
-                    input = Layers[l].Calculate(input);
-                }
-                return input;
-            }
-
-            public static double Sigmoid(double a) => 1 / (1 + Math.Pow(Math.E, -a));
-            public static double SigmoidDer(double a) => Sigmoid(a) * (1 - Sigmoid(a));
+        public Network(int[] structure) {
+            Structure = structure;
+            Init();
         }
 
-        public class Layer {
-            private int[] _structure;
-            public double Bias;
-            public double[][] Weights; // [input node][output node]
-            public double[] PreviousActivation;
-            public double[] BeforeActivation;
-            private double[] _afterActivation;
-            private Func<double, double> _activation;
-            private Func<double, double> _activationDeriv;
-
-            public double[] ActivationDerivatives;
-
-            private int outputNodeCount => _structure[1];
-            private int inputNodeCount => _structure[0];
-
-            public Layer(int[] structure, Func<double, double> activation, Func<double, double> activationDeriv) {
-                _structure = structure;
-                _activation = activation;
-                _activationDeriv = activationDeriv;
-                Randomize(DateTime.Now.Millisecond);
+        public Network(NetworkData data) {
+            Structure = data.Structure;
+            Layers = new Layer[Structure.Length - 1];
+            for (int i = 0; i < Structure.Length - 1; i++) {
+                Layers[i] = new Layer(data.Weights[i], data.Biases[i], Sigmoid, SigmoidDer);
             }
+        }
 
-            private void Randomize(int seed) {
-                Random rand = new Random(seed);
+        public NetworkData GetNetworkData() {
+            double[][][] weights = new double[Layers.Length][][];
+            double[] biases = new double[Layers.Length];
+            for (int i = 0; i < Layers.Length; ++i) {
+                weights[i] = Layers[i].Weights;
+                biases[i] = Layers[i].Bias;
+            }
+            return new NetworkData { Structure = Structure, Weights = weights, Biases = biases };
+        }
 
-                Weights = new double[inputNodeCount][];
-                for (int inputNode = 0; inputNode < inputNodeCount; ++inputNode) {
-                    Weights[inputNode] = new double[outputNodeCount];
-                    for (int outputNode = 0; outputNode < outputNodeCount; ++outputNode) {
-                        Weights[inputNode][outputNode] = (Rando.NextDouble() * 2) - 1;
-                    }
+        private void Init() {
+            Layers = new Layer[Structure.Length - 1];
+            for (int l = 0; l < Structure.Length - 1; l++) {
+                Layers[l] = new Layer(new int[] { Structure[l], Structure[l + 1] }, Sigmoid, SigmoidDer);
+            }
+        }
+
+        public double[] Calculate(double[] input) {
+            for (int l = 0; l < Layers.Length; ++l) {
+                input = Layers[l].Calculate(input);
+            }
+            return input;
+        }
+
+        public static double Sigmoid(double a) => 1 / (1 + Math.Pow(Math.E, -a));
+        public static double SigmoidDer(double a) => Sigmoid(a) * (1 - Sigmoid(a));
+    }
+
+    public class Layer {
+        private int[] _structure;
+        public double Bias;
+        public double[][] Weights; // [input node][output node]
+        public double[] PreviousActivation;
+        public double[] BeforeActivation;
+        private double[] _afterActivation;
+        private Func<double, double> _activation;
+        private Func<double, double> _activationDeriv;
+
+        public double[] ActivationDerivatives;
+
+        private int outputNodeCount => _structure[1];
+        private int inputNodeCount => _structure[0];
+
+        public Layer(int[] structure, Func<double, double> activation, Func<double, double> activationDeriv) {
+            _structure = structure;
+            _activation = activation;
+            _activationDeriv = activationDeriv;
+            Randomize();
+        }
+
+        public Layer(double[][] weights, double bias, Func<double, double> activation, Func<double, double> activationDeriv) {
+            _structure = new int[] { weights.Length, weights[0].Length };
+            _activation = activation;
+            _activationDeriv = activationDeriv;
+            Weights = weights;
+            Bias = bias;
+        }
+
+        private void Randomize() {
+
+            Weights = new double[inputNodeCount][];
+            for (int inputNode = 0; inputNode < inputNodeCount; ++inputNode) {
+                Weights[inputNode] = new double[outputNodeCount];
+                for (int outputNode = 0; outputNode < outputNodeCount; ++outputNode) {
+                    Weights[inputNode][outputNode] = (Rando.NextDouble() * 2) - 1;
                 }
-                Bias = (Rando.NextDouble() * 1) - 0.5;
             }
+            Bias = (Rando.NextDouble() * 1) - 0.5;
+        }
 
-            public double[] Calculate(double[] input) {
-                PreviousActivation = input;
-                BeforeActivation = new double[outputNodeCount];
-                _afterActivation = new double[outputNodeCount];
-                ActivationDerivatives = new double[outputNodeCount];
+        public double[] Calculate(double[] input) {
+            PreviousActivation = input;
+            BeforeActivation = new double[outputNodeCount];
+            _afterActivation = new double[outputNodeCount];
+            ActivationDerivatives = new double[outputNodeCount];
 
-                for (int o = 0; o < outputNodeCount; ++o) {
-                    double productSum = Bias;
-                    for (int i = 0; i < inputNodeCount; ++i) {
-                        productSum += Weights[i][o] * input[i];
-                    }
-                    BeforeActivation[o] = productSum;
-                    ActivationDerivatives[o] = _activationDeriv(BeforeActivation[o]);
-                    _afterActivation[o] = _activation(BeforeActivation[o]);
+            for (int o = 0; o < outputNodeCount; ++o) {
+                double productSum = Bias;
+                for (int i = 0; i < inputNodeCount; ++i) {
+                    productSum += Weights[i][o] * input[i];
                 }
-
-                return _afterActivation;
+                BeforeActivation[o] = productSum;
+                ActivationDerivatives[o] = _activationDeriv(BeforeActivation[o]);
+                _afterActivation[o] = _activation(BeforeActivation[o]);
             }
+
+            return _afterActivation;
         }
     }
 

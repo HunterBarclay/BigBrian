@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "Sz/DYSWu6gu9TGRerhr19KhJqdESqdEfYHeffQuH+cdh17byeTHjF9I8Sw8EJoGHbjyGL8nq5ceVwEggoN17zA==",
+  "dgSpecHash": "HQK5BBpUUy8j+OCbjWKPv8sjpYbewA9xbOFzCTn/iNOtPuvmTpqIg/wEKYcyzGYPDEJaPw/DIrHZ27eWTXwAqA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\hunte\\git\\BigBrian\\BigBrian.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "/home/n30b4rt/git/BigBrian/BigBrian.csproj",
+  "expectedPackageFiles": [
+    "/home/n30b4rt/.nuget/packages/newtonsoft.json/13.0.1/newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
   "logs": []
 }

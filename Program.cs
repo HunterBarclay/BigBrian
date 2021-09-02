@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using BigBrian.v2;
+using Newtonsoft.Json;
 
 namespace BigBrian
 {
-    class Program
-    {
+    public class Program {
+
         public static TestCase[] XOR_DATA = new TestCase[] {
                 new TestCase { inputs = new double[] { 0.0, 0.0 }, outputs = new double[] { 0.0 } },
                 new TestCase { inputs = new double[] { 1.0, 0.0 }, outputs = new double[] { 1.0 } },
@@ -36,105 +38,60 @@ namespace BigBrian
             };
 
         public static void Main(string[] args) {
-
-            
-
-            var omg = new OmegaTrainer(new int[] { 2, 2, 1 }, NAND_DATA);
-            for (int i = 0; i < 50000; ++i) {
-                omg.Test(i % 10000 == 0);
-            }
-            Console.WriteLine($"\n Final Cost -> {omg.LastCost}");
-        }
-
-        #region Old
-
-        static NeuralNet n;
-        public static bool Done = false;
-
-        static int[] structure = new int[] { 2, 2, 3 };
-
-        static (double[], double[])[] ORGateData = new (double[], double[])[] {
-            (new double[]{ 0.0, 0.0 }, new double[]{ 0.0 }),
-            (new double[]{ 0.0, 1.0 }, new double[]{ 1.0 }),
-            (new double[]{ 1.0, 0.0 }, new double[]{ 1.0 }),
-            (new double[]{ 1.0, 1.0 }, new double[]{ 1.0 })
-        };
-        static (double[], double[])[] NotGateData = new (double[], double[])[] {
-            (new double[]{ 0.0 }, new double[]{ 1.0 }),
-            (new double[]{ 1.0 }, new double[]{ 0.0 })
-        };
-        static (double[], double[])[] ANDGateData = new (double[], double[])[] {
-            (new double[]{ 0.0, 0.0 }, new double[]{ 0.0, 0.0, 0.0 }),
-            (new double[]{ 0.0, 1.0 }, new double[]{ 0.0, 0.0, 0.0 }),
-            (new double[]{ 1.0, 0.0 }, new double[]{ 0.0, 0.0, 0.0 }),
-            (new double[]{ 1.0, 1.0 }, new double[]{ 1.0, 1.0, 1.0 })
-        };
-
-        static void Main2(string[] args)
-        {
-            var rand = new Random();
-
-            List<(double[], double[])> newData = new List<(double[], double[])>();
-            for (int i = 0; i < 500; i++) {
-                double x = (rand.NextDouble() * 50) - 25;
-                double y = (rand.NextDouble() * 50) - 25;
-                double output = (0.5 * x) + 2 > y ? 1.0 : 0.0;
-                newData.Add((new double[]{x, y}, new double[]{output}));
-            }
-
-            int interations = 100000;
-            var trainer = new BackPropTrainer(structure, ANDGateData);
-            var progressTracker = new Thread(() => {
-                try {
-                    while (!Done) {
-                        Thread.Sleep(1000);
-                        double percent = (100 * ((double)trainer.Modifications / (double)interations));
-                        if (!Done) {
-                            // Console.Clear();
-                            Console.WriteLine($"Progress => {percent.ToString().Substring(0, 5)}%");
-                        }
-                    }
-                } catch (Exception e) { } // Whoop... fuck
-            });
-            progressTracker.Start();
-            trainer.Train(interations, false);
-            // Console.ReadKey();
-        }
-
-        public static List<double> MergeSortNetworks(List<double> a) => MergeSortNetworks(a.GetRange(0, a.Count / 2), a.GetRange(a.Count / 2, a.Count - (a.Count / 2)));
-
-        public static List<double> MergeSortNetworks(List<double> a, List<double> b) {
-            if (a.Count > 1)
-                a = MergeSortNetworks(a.GetRange(0, a.Count / 2), a.GetRange(a.Count / 2, a.Count - (a.Count / 2)));
-            if (b.Count > 1)
-                b = MergeSortNetworks(b.GetRange(0, b.Count / 2), b.GetRange(b.Count / 2, b.Count - (b.Count / 2)));
-
-            List<double> sortedList = new List<double>();
-            int counterA = 0;
-            int counterB = 0;
-
-            while (sortedList.Count < a.Count + b.Count) {
-
-                if (counterA >= a.Count) {
-                    sortedList.Add(b[counterB]);
-                    counterB++;
-                } else if (counterB >= b.Count) {
-                    sortedList.Add(a[counterA]);
-                    counterA++;
-                } else {
-                    if (a[counterA] > b[counterB]) {
-                        sortedList.Add(b[counterB]);
-                        counterB++;
-                    } else {
-                        sortedList.Add(a[counterA]);
-                        counterA++;
-                    }
+            Network n = new Network(JsonConvert.DeserializeObject<NetworkData>(File.ReadAllText("./NetworkData.json")));
+            var fs = File.Create("Data.csv");
+            var sw = new StreamWriter(fs);
+            sw.WriteLine("input1,input2,output1");
+            for (double x = 0; x < 1; x += 0.02) {
+                for (double y = 0; y < 1; y += 0.02) {
+                    sw.Write($"{x},{y}");
+                    var output = n.Calculate(new double[] { x, y });
+                    sw.Write($",{output[0]}\n");
+                    sw.Flush();
                 }
             }
-
-            return sortedList;
+            sw.Close();
+            fs.Close();
         }
 
-        #endregion
+        public static void Main2(string[] args) {
+
+            if (args.Length > 0) {
+                Network n = new Network(JsonConvert.DeserializeObject<NetworkData>(File.ReadAllText(args[0])));
+                while (true) {
+                    double[] input = new double[n.Structure[0]];
+                    for (int i = 0; i < n.Structure[0]; ++i) {
+                        Console.Write($"[{i}]: ");
+                        input[i] = double.Parse(Console.ReadLine());
+                    }
+                    Console.WriteLine("\nResults\n");
+                    var output = n.Calculate(input);
+                    for (int i = 0; i < output.Length; ++i) {
+                        // int result = output[i] > 0.5 ? 1 : 0;
+                        Console.WriteLine($"[{i}] -> {output[i]}");
+                    }
+                    Console.WriteLine("\n");
+                }
+            } else {
+
+                var omg = new OmegaTrainer(new int[] { 2, 2, 1 }, XOR_DATA);
+
+                int iterations = 5000000;
+                for (int i = 0; i < iterations; ++i) {
+                    int period = 500000;
+                    omg.Test(i % period == 0, false);
+                    if (i % period == 0) {
+                        Console.WriteLine($"Progress [{(int)((double)i * 100.0 / (double)iterations)}%]");
+                    }
+                }
+                Console.WriteLine($"\n Final Cost -> {omg.LastCost}");
+
+                omg.Test(false, true);
+
+                var data = omg.TargetNetwork.GetNetworkData();
+                string json = JsonConvert.SerializeObject(data, Formatting.Indented);
+                File.WriteAllText("./NetworkData.json", json);
+            }
+        }
     }
 }
