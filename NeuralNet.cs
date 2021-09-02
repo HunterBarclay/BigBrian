@@ -205,7 +205,7 @@ namespace BigBrian {
                     for (int i = 0; i < weights.Length; i++) {
                         double tempBiasDelta = 0.0;
                         for (int k = 0; k < foreLayer.size; k++) {
-                            tempBiasDelta += (foreLayer.weightDeltas[j][k] / foreLayer.trainingMeta.FedData[k])
+                            tempBiasDelta += (foreLayer.gammas[j][k])
                                 * foreLayer.weights[j][k] * ActivationDer(trainingMeta.BeforeActivation[j]);
                         }
                         biasDeltas[j] = tempBiasDelta;// / foreLayer.size;
