@@ -23,6 +23,8 @@ namespace BigBrian {
         public void InitFile(string name) {
             string path = $"logs\\{name}_data.csv";
             // string path = $"logs\\{name}_{String.Format("{0:u}", DateTime.Now).Replace(' ', '_').Replace(':', '-')}.csv";
+            if (!Directory.Exists("logs\\"))
+                Directory.CreateDirectory("logs\\");
             var fs = File.Create(path);
             writer = new StreamWriter(fs);
         }

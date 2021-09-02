@@ -1,24 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using BigBrian.v2;
 
 namespace BigBrian
 {
     class Program
     {
+        public static void Main(string[] args) {
+
+            TestCase[] data = new TestCase[] {
+                new TestCase { inputs = new double[] { 0.0, 0.0 }, outputs = new double[] { 0.0 } },
+                new TestCase { inputs = new double[] { 1.0, 0.0 }, outputs = new double[] { 1.0 } },
+                new TestCase { inputs = new double[] { 0.0, 1.0 }, outputs = new double[] { 1.0 } },
+                new TestCase { inputs = new double[] { 1.0, 1.0 }, outputs = new double[] { 0.0 } }
+            };
+
+            var omg = new OmegaTrainer(new int[] { 2, 2, 1 }, data);
+            for (int i = 0; i < 50000; ++i) {
+                omg.Test(i % 10000 == 0);
+            }
+            Console.WriteLine($"\n Final Cost -> {omg.LastCost}");
+        }
+
+        #region Old
+
         static NeuralNet n;
         public static bool Done = false;
 
-        static int[] structure = new int[] { 2, 4, 4, 1 };
+        static int[] structure = new int[] { 2, 2, 3 };
 
-        static (double[], double[])[] data = new (double[], double[])[] {
+        static (double[], double[])[] ORGateData = new (double[], double[])[] {
             (new double[]{ 0.0, 0.0 }, new double[]{ 0.0 }),
-            (new double[]{ 0.0, 1.0 }, new double[]{ 0.0 }),
-            (new double[]{ 1.0, 0.0 }, new double[]{ 0.0 }),
+            (new double[]{ 0.0, 1.0 }, new double[]{ 1.0 }),
+            (new double[]{ 1.0, 0.0 }, new double[]{ 1.0 }),
             (new double[]{ 1.0, 1.0 }, new double[]{ 1.0 })
         };
+        static (double[], double[])[] NotGateData = new (double[], double[])[] {
+            (new double[]{ 0.0 }, new double[]{ 1.0 }),
+            (new double[]{ 1.0 }, new double[]{ 0.0 })
+        };
+        static (double[], double[])[] ANDGateData = new (double[], double[])[] {
+            (new double[]{ 0.0, 0.0 }, new double[]{ 0.0, 0.0, 0.0 }),
+            (new double[]{ 0.0, 1.0 }, new double[]{ 0.0, 0.0, 0.0 }),
+            (new double[]{ 1.0, 0.0 }, new double[]{ 0.0, 0.0, 0.0 }),
+            (new double[]{ 1.0, 1.0 }, new double[]{ 1.0, 1.0, 1.0 })
+        };
 
-        static void Main(string[] args)
+        static void Main2(string[] args)
         {
             var rand = new Random();
 
@@ -30,8 +59,8 @@ namespace BigBrian
                 newData.Add((new double[]{x, y}, new double[]{output}));
             }
 
-            int interations = 1000000;
-            var trainer = new BackPropTrainer(structure, data);
+            int interations = 100000;
+            var trainer = new BackPropTrainer(structure, ANDGateData);
             var progressTracker = new Thread(() => {
                 try {
                     while (!Done) {
@@ -82,5 +111,7 @@ namespace BigBrian
 
             return sortedList;
         }
+
+        #endregion
     }
 }

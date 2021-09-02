@@ -22,9 +22,15 @@ namespace BigBrian {
             string header = "calc";
 
             for (int i = 0; i < billy.layers.Length; i++) {
-                header += $",b{i+1}";
-                for (int x = 0; x < billy.layers[i].weights.Length * billy.layers[i].weights[0].Length; x++) {
-                    header += $",w{i+1}_{x}";
+
+                for (int x = 0; x < billy.layers[i].Size; x++) {
+                    header += $",b{i+1}_{x}";
+                }
+                
+                for (int x = 0; x < billy.layers[i].Size; x++) {
+                    for (int y = 0; y < billy.layers[i].weights.Length; y++) {
+                        header += $",w{i+1}_{x*y}";
+                    }
                 }
             }
             header += ",cost";
@@ -67,11 +73,17 @@ namespace BigBrian {
                     string deltaData = $"{Calculations}";
                     string valueData = $"{Calculations}";
                     for (int i = 0; i < billy.layers.Length; i++) {
-                        deltaData += $",{billy.layers[i].biasDelta}";
-                        valueData += $",{billy.layers[i].bias}";
-                        for (int x = 0; x < billy.layers[i].weights.Length * billy.layers[i].weights[0].Length; x++) {
-                            deltaData += $",{billy.layers[i].weightDeltas[x/billy.layers[i].weights[0].Length][x%billy.layers[i].weights[0].Length]}";
-                            valueData += $",{billy.layers[i].weights[x/billy.layers[i].weights[0].Length][x%billy.layers[i].weights[0].Length]}";
+
+                        for (int x = 0; x < billy.layers[i].Size; x++) {
+                            deltaData += $",{billy.layers[i].biasDeltas[x]}";
+                            valueData += $",{billy.layers[i].biases[x]}";
+                        }
+                        
+                        for (int x = 0; x < billy.layers[i].Size; x++) {
+                            for (int y = 0; y < billy.layers[i].weights.Length; y++) {
+                                deltaData += $",{billy.layers[i].weightDeltas[y][x]}";
+                                valueData += $",{billy.layers[i].weights[y][x]}";
+                            }
                         }
                     }
                     deltaLog.Log(deltaData + $",{billy.Cost}");
