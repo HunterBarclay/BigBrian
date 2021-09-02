@@ -19,6 +19,7 @@ namespace BigBrian.v2 {
 
     public class OmegaTrainer {
 
+        public const double DELTA_ADJUSTMENT = 5;
         public TestCase[] Data;
         public Network TargetNetwork;
 
@@ -89,10 +90,10 @@ namespace BigBrian.v2 {
             for (int x = 0; x < gradient.weightDelta.Length; ++x) {
                 for (int y = 0; y < gradient.weightDelta[x].Length; ++y) {
                     for (int z = 0; z < gradient.weightDelta[x][y].Length; ++z) {
-                        TargetNetwork.Layers[x].Weights[y][z] -= (gradient.weightDelta[x][y][z] / gradients.Count) * 5;
+                        TargetNetwork.Layers[x].Weights[y][z] -= (gradient.weightDelta[x][y][z] / gradients.Count) * DELTA_ADJUSTMENT;
                     }
                 }
-                TargetNetwork.Layers[x].Bias -= (gradient.biasDelta[x] / gradients.Count) * 5;
+                TargetNetwork.Layers[x].Bias -= (gradient.biasDelta[x] / gradients.Count) * DELTA_ADJUSTMENT;
             }
 
             gradients.Clear();

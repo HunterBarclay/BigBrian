@@ -7,16 +7,39 @@ namespace BigBrian
 {
     class Program
     {
-        public static void Main(string[] args) {
-
-            TestCase[] data = new TestCase[] {
+        public static TestCase[] XOR_DATA = new TestCase[] {
                 new TestCase { inputs = new double[] { 0.0, 0.0 }, outputs = new double[] { 0.0 } },
                 new TestCase { inputs = new double[] { 1.0, 0.0 }, outputs = new double[] { 1.0 } },
                 new TestCase { inputs = new double[] { 0.0, 1.0 }, outputs = new double[] { 1.0 } },
                 new TestCase { inputs = new double[] { 1.0, 1.0 }, outputs = new double[] { 0.0 } }
             };
 
-            var omg = new OmegaTrainer(new int[] { 2, 2, 1 }, data);
+        public static TestCase[] AND_DATA = new TestCase[] {
+                new TestCase { inputs = new double[] { 0.0, 0.0 }, outputs = new double[] { 0.0 } },
+                new TestCase { inputs = new double[] { 1.0, 0.0 }, outputs = new double[] { 0.0 } },
+                new TestCase { inputs = new double[] { 0.0, 1.0 }, outputs = new double[] { 0.0 } },
+                new TestCase { inputs = new double[] { 1.0, 1.0 }, outputs = new double[] { 1.0 } }
+            };
+
+        public static TestCase[] OR_DATA = new TestCase[] {
+                new TestCase { inputs = new double[] { 0.0, 0.0 }, outputs = new double[] { 0.0 } },
+                new TestCase { inputs = new double[] { 1.0, 0.0 }, outputs = new double[] { 1.0 } },
+                new TestCase { inputs = new double[] { 0.0, 1.0 }, outputs = new double[] { 1.0 } },
+                new TestCase { inputs = new double[] { 1.0, 1.0 }, outputs = new double[] { 1.0 } }
+            };
+
+        public static TestCase[] NAND_DATA = new TestCase[] {
+                new TestCase { inputs = new double[] { 0.0, 0.0 }, outputs = new double[] { 1.0 } },
+                new TestCase { inputs = new double[] { 1.0, 0.0 }, outputs = new double[] { 1.0 } },
+                new TestCase { inputs = new double[] { 0.0, 1.0 }, outputs = new double[] { 1.0 } },
+                new TestCase { inputs = new double[] { 1.0, 1.0 }, outputs = new double[] { 0.0 } }
+            };
+
+        public static void Main(string[] args) {
+
+            
+
+            var omg = new OmegaTrainer(new int[] { 2, 2, 1 }, NAND_DATA);
             for (int i = 0; i < 50000; ++i) {
                 omg.Test(i % 10000 == 0);
             }
