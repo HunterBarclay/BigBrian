@@ -1,2 +1,8 @@
-logs/*.csv
+*/.vscode/
+*/bin/
+*/.vs/
+*/obj/
+obj/
+bin/
+.vs/
 .vscode/
