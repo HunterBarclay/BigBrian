@@ -2,6 +2,7 @@
 using BigBrian.v2;
 using Newtonsoft.Json;
 using System.IO;
+using System.Linq;
 
 namespace BigBrianTester {
     class Program {
@@ -33,11 +34,51 @@ namespace BigBrianTester {
                 new TestCase { inputs = new double[] { 1.0, 1.0 }, outputs = new double[] { 0.0 } }
             };
 
-        public static void Main2(string[] args) {
-            Network n = new Network(JsonConvert.DeserializeObject<NetworkData>(File.ReadAllText("./NetworkData.json")));
+        public static TestCase[] HALF_ADDER_DATA = new TestCase[] {
+                new TestCase { inputs = new double[] { 0.0, 0.0 }, outputs = new double[] { 0.0, 0.0 } },
+                new TestCase { inputs = new double[] { 1.0, 0.0 }, outputs = new double[] { 1.0, 0.0 } },
+                new TestCase { inputs = new double[] { 0.0, 1.0 }, outputs = new double[] { 1.0, 0.0 } },
+                new TestCase { inputs = new double[] { 1.0, 1.0 }, outputs = new double[] { 0.0, 1.0 } }
+            };
+
+        public static TestCase[] FULL_ADDER_DATA = new TestCase[] {
+            new TestCase { inputs = new double[] { 0.0, 0.0, 0.0 }, outputs = new double[] { 0.0, 0.0 } },
+            new TestCase { inputs = new double[] { 1.0, 0.0, 0.0 }, outputs = new double[] { 1.0, 0.0 } },
+            new TestCase { inputs = new double[] { 0.0, 1.0, 0.0 }, outputs = new double[] { 1.0, 0.0 } },
+            new TestCase { inputs = new double[] { 1.0, 1.0, 0.0 }, outputs = new double[] { 0.0, 1.0 } },
+            new TestCase { inputs = new double[] { 0.0, 0.0, 1.0 }, outputs = new double[] { 1.0, 0.0 } },
+            new TestCase { inputs = new double[] { 1.0, 0.0, 1.0 }, outputs = new double[] { 0.0, 1.0 } },
+            new TestCase { inputs = new double[] { 0.0, 1.0, 1.0 }, outputs = new double[] { 0.0, 1.0 } },
+            new TestCase { inputs = new double[] { 1.0, 1.0, 1.0 }, outputs = new double[] { 1.0, 1.0 } },
+            };
+
+        public static void Main(string[] args) {
+            switch (args.Length > 0 ? args[0].ToLower() : "") {
+                case "eval":
+                    Evaluate(args.Skip(1).ToArray());
+                    break;
+                default:
+                    Train();
+                    break;
+            }
+        }
+
+        [Obsolete]
+        public static void Evaluate(string[] args) {
+            Network n = new Network(JsonConvert.DeserializeObject<NetworkData>(File.ReadAllText("./Networks/NetworkData.json")));
             var fs = File.Create("Data.csv");
             var sw = new StreamWriter(fs);
-            sw.WriteLine("input1,input2,output1");
+
+            for (int i = 0; i < n.Structure[0]; ++i) {
+                if (i > 0)
+                    sw.Write(",");
+                sw.Write($"input{i}");
+            }
+            for (int i = 0; i < n.Structure[n.Structure.Length - 1]; ++i) {
+                sw.Write($",output{i}");
+            }
+            sw.Write("\n");
+
             for (double x = 0; x < 1; x += 0.02) {
                 for (double y = 0; y < 1; y += 0.02) {
                     sw.Write($"{x},{y}");
@@ -50,44 +91,30 @@ namespace BigBrianTester {
             fs.Close();
         }
 
-        public static void Main(string[] args) {
+        public static void Train() {
+            var omg = new OmegaTrainer(new int[] { 2, 8, 8, 8, 1 }, XOR_DATA);
 
-            if (args.Length > 0) {
-                Network n = new Network(JsonConvert.DeserializeObject<NetworkData>(File.ReadAllText(args[0])));
-                while (true) {
-                    double[] input = new double[n.Structure[0]];
-                    for (int i = 0; i < n.Structure[0]; ++i) {
-                        Console.Write($"[{i}]: ");
-                        input[i] = double.Parse(Console.ReadLine());
-                    }
-                    Console.WriteLine("\nResults\n");
-                    var output = n.Calculate(input);
-                    for (int i = 0; i < output.Length; ++i) {
-                        // int result = output[i] > 0.5 ? 1 : 0;
-                        Console.WriteLine($"[{i}] -> {output[i]}");
-                    }
-                    Console.WriteLine("\n");
+            int iterations = 80000000;
+            int i;
+            for (i = 0; i < iterations; ++i) {
+                int period = 1000000;
+                var done = omg.Test(0.001, i % period == 0, false);
+                if (i % period == 0) {
+                    Console.WriteLine($"Progress [{(int)((double)i * 100.0 / (double)iterations)}%]");
                 }
-            } else {
-
-                var omg = new OmegaTrainer(new int[] { 2, 2, 1 }, XOR_DATA);
-
-                int iterations = 800000;
-                for (int i = 0; i < iterations; ++i) {
-                    int period = 100000;
-                    omg.Test(i % period == 0, false);
-                    if (i % period == 0) {
-                        Console.WriteLine($"Progress [{(int)((double)i * 100.0 / (double)iterations)}%]");
-                    }
-                }
-                Console.WriteLine($"\n Final Cost -> {omg.LastCost}");
-
-                omg.Test(false, true);
-
-                var data = omg.TargetNetwork.GetNetworkData();
-                string json = JsonConvert.SerializeObject(data, Formatting.Indented);
-                File.WriteAllText("./Networks/NetworkData.json", json);
+                if (done)
+                    break;
             }
+            if (i < iterations) {
+                Console.WriteLine($"\n Finished after {i + 1} Iterations");
+            }
+            Console.WriteLine($"\n Final Cost -> {omg.LastCost}");
+
+            omg.Test(0, false, true);
+
+            var data = omg.TargetNetwork.GetNetworkData();
+            string json = JsonConvert.SerializeObject(data, Formatting.Indented);
+            File.WriteAllText("./Networks/NetworkData.json", json);
         }
     }
 }
