@@ -3,6 +3,7 @@ using BigBrian.v2;
 using Newtonsoft.Json;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace BigBrianTester {
     class Program {
@@ -92,13 +93,16 @@ namespace BigBrianTester {
         }
 
         public static void Train() {
-            var omg = new OmegaTrainer(new int[] { 2, 8, 8, 8, 1 }, XOR_DATA);
 
-            int iterations = 80000000;
+            var EIGHT_BIT_ADDER_DATA = GenerateAdderData();
+
+            var omg = new OmegaTrainer(new int[] { 8, 12, 8, 5, 5, 5, 4 }, EIGHT_BIT_ADDER_DATA);
+
+            int iterations = 8000;
             int i;
             for (i = 0; i < iterations; ++i) {
-                int period = 1000000;
-                var done = omg.Test(0.001, i % period == 0, false);
+                int period = 1;
+                var done = omg.Test(0.01, i % period == 0, i % period == 50);
                 if (i % period == 0) {
                     Console.WriteLine($"Progress [{(int)((double)i * 100.0 / (double)iterations)}%]");
                 }
@@ -115,6 +119,29 @@ namespace BigBrianTester {
             var data = omg.TargetNetwork.GetNetworkData();
             string json = JsonConvert.SerializeObject(data, Formatting.Indented);
             File.WriteAllText("./Networks/NetworkData.json", json);
+        }
+
+        public static TestCase[] GenerateAdderData() {
+            List<TestCase> cases = new List<TestCase>();
+            for (byte a = 0; a < 16; a++) {
+                for (byte b = 0; b < 16; b++) {
+                    byte c = (byte)(a + b);
+                    var input = new List<double>(ByteToData(a));
+                    input = new List<double>(input.Skip(4));
+                    input.AddRange(ByteToData(b).Skip(4));
+                    var output = ByteToData(c).Skip(4);
+                    cases.Add(new TestCase { inputs = input.ToArray(), outputs = output.ToArray() });
+                }
+            }
+            return cases.ToArray();
+        }
+
+        private static double[] ByteToData(byte a) {
+            double[] data = new double[8];
+            for (int i = 7; i >= 0; --i) {
+                data[7 - i] = (a >> i) & 0x0001;
+            }
+            return data;
         }
     }
 }
