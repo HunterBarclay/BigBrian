@@ -8,26 +8,30 @@ include(CTest)
 
 add_subdirectory("./brian")
 
-# create the testing file and list of tests
 set(TestsToRun
-    "test/src/SampleTest.cpp"
-    "test/src/MatrixTest.cpp"
+    "test/src/sample.cpp"
+
+    "test/src/math/matrix/init.cpp"
+    "test/src/math/matrix/mult.cpp"
+    "test/src/math/matrix/mult_reuse.cpp"
+    "test/src/math/matrix/add.cpp"
+    "test/src/math/matrix/add_reuse.cpp"
+    "test/src/math/matrix/str.cpp"
+    "test/src/math/matrix/mutate.cpp"
+
+    "test/src/network/init.cpp"
 )
-# create_test_sourcelist(Tests "CommonTest.cpp" ${TestToRun})
+create_test_sourcelist(Tests "test/src/common.cpp" ${TestsToRun})
 
-# add the executable
-# add_executable(CommonTest ${Tests})
+add_executable(CommonTest "test/src/util.cpp" ${Tests})
+set(TEST_OUTPUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}tests/")
+set_target_properties(${CommonTest} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIR})
 
-# target_link_libraries(CommonTest BigBrianLib)
+target_link_libraries(CommonTest BigBrianLib)
+target_include_directories(CommonTest PRIVATE "test/include")
 
-# Add all the ADD_TEST for each test
 foreach(test ${TestsToRun})
-    get_filename_component(TName ${test} NAME_WE)
-
-    message("Adding test ${TName}")
-
-    add_executable(${TName} ${test})
-    target_link_libraries(${TName} BigBrianLib)
-    set_target_properties(${TName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}tests/")
-    add_test(NAME ${TName} COMMAND ${TName})
+    string(REGEX REPLACE "\\.[^.]*$" "" TName ${test})
+    # get_filename_component(TName ${test} NAME_WE)
+    add_test(NAME ${TName} COMMAND CommonTest ${TName})
 endforeach()

@@ -1,5 +1,12 @@
-add_library(BigBrianLib
+set(BIGBRIAN_SOURCE
     "src/math/Matrix.cpp"
+    "src/nn/Layer.cpp"
+    "src/nn/Network.cpp"
+    "src/nn/ActivationFuncs.cpp"
+)
+
+add_library(BigBrianLib
+    ${BIGBRIAN_SOURCE}
 )
 target_include_directories(BigBrianLib PUBLIC "include/")
 
