@@ -20,6 +20,8 @@ set(TestsToRun
     "test/src/math/matrix/mutate.cpp"
 
     "test/src/network/init.cpp"
+    "test/src/network/feedforward.cpp"
+    "test/src/network/score.cpp"
 )
 create_test_sourcelist(Tests "test/src/common.cpp" ${TestsToRun})
 

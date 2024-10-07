@@ -4,6 +4,8 @@
  * @author Hunter Barclay
  * @brief Really simple, conentional neural network.
  * 
+ * I really don't know why I'm using ushort for layer sizes.
+ * 
  * https://www.v7labs.com/blog/neural-networks-activation-functions
  * 
  * First activation functions I'll try using:
@@ -28,6 +30,8 @@ namespace bb {
     struct NetworkDescriptor {
         const uint numLayers;
         const ushort *layerSizes;
+        const RActivation hiddenActivation;
+        const RActivation outputActivation;
     };
 
     /**
@@ -38,15 +42,15 @@ namespace bb {
      */
     class Layer {
     private:
-        std::unique_ptr<bb::Matrix> m_biases;
-        std::unique_ptr<bb::Matrix> m_weights;
+        std::shared_ptr<bb::Matrix> m_biases;
+        std::shared_ptr<bb::Matrix> m_weights;
 
         std::shared_ptr<bb::Matrix> m_nodes;
 
         std::shared_ptr<Layer> m_next;
         std::shared_ptr<Layer> m_prev;
 
-        const uint m_num;
+        const uint m_layerNum;
         const ushort m_fromSize;
         const ushort m_toSize;
 
@@ -82,10 +86,16 @@ namespace bb {
          * @param p_min Minimum a weight can be.
          * @param p_max Maximum a weight can be.
          */
-        void randomizeWeights(const Real p_min, const Real p_max);
+        void RandomizeWeights(const Real p_min, const Real p_max);
+
+        void RandomizeBiases(const Real p_min, const Real p_max);
 
         inline const Real* const getNodeValues() const {
             return this->m_nodes->getRef();
+        }
+
+        inline std::shared_ptr<Layer> getNext() const {
+            return this->m_next;
         }
 
         /**
@@ -97,6 +107,10 @@ namespace bb {
             this->m_next = p_next;
         }
 
+        inline std::shared_ptr<Layer> getPrev() const {
+            return this->m_prev;
+        }
+
         /**
          * @brief Set the Prev object
          *
@@ -105,6 +119,34 @@ namespace bb {
         inline void setPrev(std::shared_ptr<Layer> p_prev) {
             this->m_prev = p_prev;
         }
+
+        inline ushort getNumNodes() const {
+            return this->m_nodes->getNumRows();
+        }
+
+        inline const std::shared_ptr<const Matrix> getNodes() const {
+            return this->m_nodes;
+        }
+
+        inline const std::shared_ptr<const Matrix> getWeights() const {
+            return this->m_weights;
+        }
+
+        inline const std::shared_ptr<const Matrix> getBiases() const {
+            return this->m_biases;
+        }
+
+        inline const uint getLayerNum() const {
+            return this->m_layerNum;
+        }
+    };
+
+    /**
+     * @brief Score of a network.
+     */
+    struct NetworkScore {
+        std::vector<Real> nodeScores;
+        const Real overallScore;
     };
 
     /**
@@ -127,8 +169,14 @@ namespace bb {
         Network(const Network &_) = delete;
         ~Network();
 
+        void Randomize(const Real p_minBias, const Real p_maxBias, const Real p_minWeight, const Real p_maxWeight);
+
         void Load(const Real* const p_input);
 
-        const Real* const Feedforward();
+        std::vector<Real> Feedforward();
+
+        NetworkScore Score(const Real* const p_expected) const;
+
+        std::string str(bool p_input, bool p_hidden, bool p_weights, bool p_biases, bool p_output) const;
     };
 }

@@ -6,7 +6,7 @@ When I initially created this project, I actually just misspelled "brain", so ye
 This project is a playground for me to learn more about neural networks and machine learning.
 
 ## Goals
-- [ ] Convolutional neural network with hidden layers and per-node biases.
+- [x] Convolutional neural network with hidden layers and per-node biases.
 - [ ] Propagation of a number of a population of networks with a set of data, plus scoring and ranking for the population.
 - [ ] Network training using back propagation.
 

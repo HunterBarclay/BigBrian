@@ -1,6 +1,8 @@
 #include <iostream>
 
+#include <brian/prelude.h>
+
 int main(int argc, char** argv) {
-    std::cout << "Hello world thing\n";
+    // TODO: Dump matrix data for testing
     return 0;
 }

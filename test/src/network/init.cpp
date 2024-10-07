@@ -18,7 +18,9 @@ int test_src_network_init(int argc, char** argv) {
     };
     bb::NetworkDescriptor desc = {
         3,
-        layers
+        layers,
+        bb::LeakyReLU,
+        bb::Linear
     };
 
     auto mat = std::make_unique<bb::Network>(desc);
