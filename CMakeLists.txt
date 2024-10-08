@@ -8,6 +8,12 @@ include(CTest)
 
 add_subdirectory("./brian")
 
+### UNIT TESTING
+# So this was a process, but essentially for ease of compatibility with IDE
+# debuggers, I'm making each unit test it's own executable, all stored in a
+# similar fashion that they are when they are compiled execept inside the
+# output directory.
+
 set(TestsToRun
     "test/src/sample.cpp"
 
@@ -23,17 +29,28 @@ set(TestsToRun
     "test/src/network/feedforward.cpp"
     "test/src/network/score.cpp"
 )
-create_test_sourcelist(Tests "test/src/common.cpp" ${TestsToRun})
 
-add_executable(CommonTest "test/src/util.cpp" ${Tests})
-set(TEST_OUTPUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}tests/")
-set_target_properties(${CommonTest} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIR})
-
-target_link_libraries(CommonTest BigBrianLib)
-target_include_directories(CommonTest PRIVATE "test/include")
+set(UtilSource "test/src/util.cpp")
 
 foreach(test ${TestsToRun})
-    string(REGEX REPLACE "\\.[^.]*$" "" TName ${test})
-    # get_filename_component(TName ${test} NAME_WE)
-    add_test(NAME ${TName} COMMAND CommonTest ${TName})
+    get_filename_component(TestName ${test} NAME_WE)
+    # string(REGEX REPLACE "/[^/]*$" "" Dir ${test})
+    string(REGEX REPLACE "^test/src/" "" RemoveTestDir ${test})
+    if (RemoveTestDir MATCHES "/")
+        string(REGEX REPLACE "/[^/]*$" "" TestDirPath ${RemoveTestDir})
+        string(REGEX REPLACE "/" "_" TestDirName ${TestDirPath})
+        set(TestTarget ${TestDirName}_${TestName})
+    else()
+        set(TestDirPath "")
+        set(TestTarget ${TestName})
+    endif()
+    
+    message("Adding Test: ${TestTarget}")
+
+    add_executable(${TestTarget} ${test} ${UtilSource})
+    set_target_properties(${TestTarget} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}tests/${TestDirPath}/")
+    target_link_libraries(${TestTarget} BigBrianLib)
+    target_include_directories(${TestTarget} PRIVATE "test/include/")
+
+    add_test(NAME ${TestTarget} COMMAND ${TestTarget})
 endforeach()

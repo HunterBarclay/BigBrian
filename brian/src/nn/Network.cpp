@@ -49,7 +49,7 @@ namespace bb {
 
     std::vector<Real> Network::Feedforward() {
         this->m_tail->Feedforward();
-        auto vec = std::vector<Real>((size_t)this->m_tail->getNodeValues());
+        auto vec = std::vector<Real>((size_t)this->m_tail->getNumNodes());
         vec.assign(this->m_tail->getNumNodes(), *this->m_tail->getNodeValues());
         return std::move(vec);
     }

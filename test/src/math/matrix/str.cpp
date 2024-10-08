@@ -14,7 +14,7 @@ auto bOut = "Matrix 2 x 2 [\n"
 "\t   -4,  -5.6, \n"
 "]\n";
 
-int test_src_math_matrix_str(int argc, char** argv) {
+int main(int argc, char** argv) {
     bb::Real a[] = {
         1, 2,
         3, 4,

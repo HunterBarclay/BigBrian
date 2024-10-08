@@ -11,7 +11,7 @@
 #include <cassert>
 #include <math.h>
 
-int test_src_math_matrix_init(int argc, char** argv) {
+int main(int argc, char** argv) {
     auto mat = std::make_unique<bb::Matrix>(1, 2);
     ValidateMatrix(*mat, 1, 2);
     return 0;

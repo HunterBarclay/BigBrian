@@ -12,7 +12,7 @@
 #include <math.h>
 #include <vector>
 
-int N_FF_TestA() {
+void N_FF_TestA() {
     ushort layers[] = {
         1, 2, 1
     };
@@ -41,7 +41,7 @@ int N_FF_TestA() {
     }
 }
 
-int N_FF_TestB() {
+void N_FF_TestB() {
     ushort layers[] = {
         3, 2
     };
@@ -73,7 +73,7 @@ int N_FF_TestB() {
     }
 }
 
-int test_src_network_feedforward(int argc, char** argv) {
+int main(int argc, char** argv) {
 
     N_FF_TestA();
     N_FF_TestB();

@@ -7,7 +7,7 @@
 #include <cassert>
 #include <math.h>
 
-int test_src_math_matrix_mutate(int argc, char** argv) {
+int main(int argc, char** argv) {
     bb::Real data[] = {
         1, 2,
         3, 4,

@@ -11,7 +11,7 @@
 #include <cassert>
 #include <math.h>
 
-int test_src_network_init(int argc, char** argv) {
+int main(int argc, char** argv) {
 
     ushort layers[] = {
         1, 2, 1

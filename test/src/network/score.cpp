@@ -2,7 +2,7 @@
  * @brief Test scoring. 
  */
 
-#include <brian/prelude.h>
+#include "brian/prelude.h"
 #include "util.h"
 
 #include <cstdio>
@@ -12,7 +12,8 @@
 #include <math.h>
 #include <vector>
 
-int N_S_TestA() {
+void N_S_TestA() {
+    ushort test = 0x1234;
     ushort layers[] = {
         3, 2
     };
@@ -47,7 +48,7 @@ int N_S_TestA() {
     assert(bb::repsilon(score.overallScore, 0.0));
 }
 
-int N_S_TestB() {
+void N_S_TestB() {
     ushort layers[] = {
         3, 2
     };
@@ -92,7 +93,7 @@ int N_S_TestB() {
     assert(bb::repsilon(score.overallScore, expectedOverall));
 }
 
-int test_src_network_score(int argc, char** argv) {
+int main(int argc, char** argv) {
 
     N_S_TestA();
     N_S_TestB();
