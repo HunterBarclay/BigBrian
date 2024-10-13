@@ -12,12 +12,24 @@ namespace bb {
         std::shared_ptr<Layer> prev(nullptr);
         for (uint i = 0; i < this->m_desc.numLayers; ++i) {
             // Not sure the ternaries are the best choice here.
-            auto current = std::make_shared<Layer>(
-                i,
-                p_desc.layerSizes[i],
-                i < p_desc.numLayers - 1 ? p_desc.layerSizes[i + 1] : -1,
-                i < p_desc.numLayers - 1 ? p_desc.hiddenActivation : p_desc.outputActivation
-            );
+            std::shared_ptr<Layer> current;
+            if (i < p_desc.numLayers - 1) {
+                current = std::make_shared<Layer>(
+                    i,
+                    p_desc.layerSizes[i],
+                    p_desc.layerSizes[i + 1],
+                    p_desc.hiddenActivation,
+                    p_desc.dHiddenActivation
+                );
+            } else {
+                current = std::make_shared<Layer>(
+                    i,
+                    p_desc.layerSizes[i],
+                    0,
+                    p_desc.outputActivation,
+                    p_desc.dOutputActivation
+                );
+            }
             current->setPrev(prev);
             if (prev) {
                 prev->setNext(current);
@@ -54,22 +66,37 @@ namespace bb {
         return std::move(vec);
     }
 
+    void Network::BackPropagate(const NetworkScore& p_scores) {
+        this->m_tail->BackPropagate(p_scores);
+    }
+
     NetworkScore Network::Score(const Real* const p_expected) const {
         std::vector<Real> nodeScores(this->m_tail->getNumNodes());
+        std::vector<Real> expected(this->m_tail->getNumNodes());
         auto nodeValues = this->m_tail->getNodeValues();
         Real totalScore = 0;
         for (uint i = 0; i < this->m_tail->getNumNodes(); ++i) {
             auto score = (nodeValues[i] - p_expected[i]) * (nodeValues[i] - p_expected[i]);
-            nodeScores.push_back(score);
+            expected.at(i) = p_expected[i];
+            nodeScores.at(i) = score;
             totalScore += score;
         }
         return {
+            std::move(expected),
             std::move(nodeScores),
             std::move(totalScore)
         };
     }
 
-    std::string Network::str(bool p_input, bool p_hidden, bool p_weights, bool p_biases, bool p_output) const {
+    void Network::Train(const Real p_coef) {
+        this->m_tail->Train(p_coef);
+    }
+
+    void Network::ResetTraining() {
+        this->m_tail->ResetTraining();
+    }
+
+    std::string Network::str(bool p_input, bool p_hidden, bool p_weights, bool p_biases, bool p_output, bool p_derivs, bool p_derivAccums) const {
         std::stringstream ss;
 
         if (p_input) {
@@ -83,10 +110,30 @@ namespace bb {
                 if (p_biases) {
                     ss << "\t[ BIASES (" << head->getLayerNum() - 1 << ") ]\n";
                     ss << head->getPrev()->getBiases()->str();
+
+                    if (p_derivs) {
+                        ss << "\t[ Deriv BIASES (" << head->getLayerNum() - 1 << ") ]\n";
+                        ss << head->getPrev()->getDBiases()->str();
+                    }
+
+                    if (p_derivAccums) {
+                        ss << "\t[ Deriv Accum BIASES (" << head->getLayerNum() - 1 << ") ]\n";
+                        ss << head->getPrev()->getDBiasesAccum()->str();
+                    }
                 }
                 if (p_weights) {
                     ss << "\t[ WEIGHTS (" << head->getLayerNum() - 1 << ") ]\n";
                     ss << head->getPrev()->getWeights()->str();
+
+                    if (p_derivs) {
+                        ss << "\t[ Deriv WEIGHTS (" << head->getLayerNum() - 1 << ") ]\n";
+                        ss << head->getPrev()->getDWeights()->str();
+                    }
+
+                    if (p_derivAccums) {
+                        ss << "\t[ Deriv Accum WEIGHTS (" << head->getLayerNum() - 1 << ") ]\n";
+                        ss << head->getPrev()->getDWeightsAccum()->str();
+                    }
                 }
 
                 if (head->getNext()) {

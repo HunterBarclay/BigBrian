@@ -12,7 +12,6 @@
 #include "brian/NN.h"
 
 namespace bb {
-
     /**
      * @brief Sample of deterministic data including input and expected output.
      */
@@ -25,11 +24,19 @@ namespace bb {
     private:
         std::vector<std::shared_ptr<Network>> m_population;
         std::vector<DeterministicSample> m_samples;
+
+        uint m_iterations;
     public:
         Population(const uint p_populationSize, const NetworkDescriptor p_desc);
         Population(const Population& _) = delete;
         ~Population();
 
         void PushSample(const DeterministicSample& p_sample);
+        void Iterate(bool p_verbose);
+        Real getAverageScore();
+
+        const inline uint getNumIterations() const {
+            return this->m_iterations;
+        }
     };
 }

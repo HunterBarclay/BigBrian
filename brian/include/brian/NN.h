@@ -27,11 +27,28 @@ namespace bb {
     Real Linear(Real a);
     Real dLinear(Real a);
 
+    Real Sigmoid(Real a);
+    Real dSigmoid(Real a);
+
+    /**
+     * @brief Descriptor for a convolutional neural network.
+     */
     struct NetworkDescriptor {
         const uint numLayers;
         const ushort *layerSizes;
         const RActivation hiddenActivation;
+        const RActivation dHiddenActivation;
         const RActivation outputActivation;
+        const RActivation dOutputActivation;
+    };
+
+    /**
+     * @brief Score of a network.
+     */
+    struct NetworkScore {
+        std::vector<Real> expected;
+        std::vector<Real> nodeScores;
+        const Real overallScore;
     };
 
     /**
@@ -46,6 +63,13 @@ namespace bb {
         std::shared_ptr<bb::Matrix> m_weights;
 
         std::shared_ptr<bb::Matrix> m_nodes;
+        std::shared_ptr<bb::Matrix> m_preactivation;
+
+        std::shared_ptr<bb::Matrix> m_dBiases;
+        std::shared_ptr<bb::Matrix> m_dWeights;
+        std::shared_ptr<bb::Matrix> m_dPreactivation;
+        std::shared_ptr<bb::Matrix> m_dBiasesAccum;
+        std::shared_ptr<bb::Matrix> m_dWeightsAccum;
 
         std::shared_ptr<Layer> m_next;
         std::shared_ptr<Layer> m_prev;
@@ -55,6 +79,13 @@ namespace bb {
         const ushort m_toSize;
 
         const RActivation m_activationFunc;
+        const RActivation m_dActivationFunc;
+
+        /**
+         * @brief Back propagates through the layers, generating derivatives for
+         * all inputs along the way.
+         */
+        void BackPropagate();
     public:
         /**
          * @brief Construct a new Layer object
@@ -63,7 +94,7 @@ namespace bb {
          * @param p_fromSize
          * @param p_toSize
          */
-        Layer(uint p_layerNum, ushort p_fromSize, ushort p_toSize, RActivation p_activationFunc);
+        Layer(uint p_layerNum, ushort p_fromSize, ushort p_toSize, RActivation p_activationFunc, RActivation p_dActivationFunc);
         Layer(const Layer &_) = delete;
         ~Layer();
 
@@ -74,8 +105,19 @@ namespace bb {
          * size as the layer.
          */
         void Load(const Real *const p_values);
-
         void Feedforward();
+        /**
+         * @brief Back propagates through the layers, generating derivatives for
+         * all inputs along the way.
+         * 
+         * This method kicks it off with the scores, which will have partial derivates
+         * taken in respect to the inputs of the network.
+         * 
+         * @param p_scores Scores of each output node.
+         */
+        void BackPropagate(const NetworkScore& p_scores);
+        void Train(const Real p_coef);
+        void ResetTraining();
 
         /**
          * @brief Randomize the weights in the layer.
@@ -136,17 +178,25 @@ namespace bb {
             return this->m_biases;
         }
 
+        inline const std::shared_ptr<const Matrix> getDWeights() const {
+            return this->m_dWeights;
+        }
+
+        inline const std::shared_ptr<const Matrix> getDBiases() const {
+            return this->m_dBiases;
+        }
+
+        inline const std::shared_ptr<const Matrix> getDWeightsAccum() const {
+            return this->m_dWeightsAccum;
+        }
+
+        inline const std::shared_ptr<const Matrix> getDBiasesAccum() const {
+            return this->m_dBiasesAccum;
+        }
+
         inline const uint getLayerNum() const {
             return this->m_layerNum;
         }
-    };
-
-    /**
-     * @brief Score of a network.
-     */
-    struct NetworkScore {
-        std::vector<Real> nodeScores;
-        const Real overallScore;
     };
 
     /**
@@ -170,13 +220,21 @@ namespace bb {
         ~Network();
 
         void Randomize(const Real p_minBias, const Real p_maxBias, const Real p_minWeight, const Real p_maxWeight);
-
         void Load(const Real* const p_input);
-
         std::vector<Real> Feedforward();
-
+        void BackPropagate(const NetworkScore& p_scores);
         NetworkScore Score(const Real* const p_expected) const;
+        void Train(const Real p_coef);
+        void ResetTraining();
 
-        std::string str(bool p_input, bool p_hidden, bool p_weights, bool p_biases, bool p_output) const;
+        std::string str(
+            bool p_input,
+            bool p_hidden,
+            bool p_weights,
+            bool p_biases,
+            bool p_output,
+            bool p_derivs,
+            bool p_derivAccums
+        ) const;
     };
 }

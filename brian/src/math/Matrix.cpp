@@ -4,6 +4,7 @@
 #include <cstring>
 #include <sstream>
 #include <cstdlib>
+#include <iostream>
 
 namespace bb {
 
@@ -19,6 +20,12 @@ namespace bb {
 
     Matrix::~Matrix() {
         delete[] this->m_arr;
+    }
+
+    void Matrix::CopyTo(Matrix& p_matrix) const {
+        assert(this->m_rows == p_matrix.m_rows);
+        assert(this->m_cols == p_matrix.m_cols);
+        memcpy(p_matrix.m_arr, this->m_arr, sizeof(Real) * this->m_rows * this->m_cols);
     }
 
     std::unique_ptr<Matrix> Matrix::Mult(const Matrix& p_b) const {
@@ -66,6 +73,14 @@ namespace bb {
         for (uint r = 0; r < this->m_rows; ++r) {
             for (uint c = 0; c < this->m_cols; ++c) {
                 this->set(r, c, p_func(this->get(r, c)));
+            }
+        }
+    }
+
+    void Matrix::Clear() {
+        for (uint r = 0; r < this->m_rows; ++r) {
+            for (uint c = 0; c < this->m_cols; ++c) {
+                this->set(r, c, 0);
             }
         }
     }

@@ -28,6 +28,9 @@ set(TestsToRun
     "test/src/network/init.cpp"
     "test/src/network/feedforward.cpp"
     "test/src/network/score.cpp"
+    "test/src/network/backpropagation.cpp"
+
+    "test/src/population/train.cpp"
 )
 
 set(UtilSource "test/src/util.cpp")

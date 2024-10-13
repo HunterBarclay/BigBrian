@@ -20,7 +20,9 @@ void N_FF_TestA() {
         3,
         layers,
         bb::LeakyReLU,
-        bb::Linear
+        bb::dLeakyReLU,
+        bb::Linear,
+        bb::dLinear
     };
     bb::Real input[] = {
         5
@@ -34,7 +36,7 @@ void N_FF_TestA() {
     mat->Load(input);
     auto out = mat->Feedforward();
 
-    std::cout << mat->str(true, true, true, true, true);
+    std::cout << mat->str(true, true, true, true, true, false, false);
     
     for (size_t i = 0; i < out.size(); ++i) {
         assert(bb::repsilon(expected[i], out.at(i)));
@@ -49,7 +51,9 @@ void N_FF_TestB() {
         2,
         layers,
         bb::LeakyReLU,
-        bb::Linear
+        bb::dLeakyReLU,
+        bb::Linear,
+        bb::dLinear
     };
     bb::Real input[] = {
         1,
@@ -66,7 +70,7 @@ void N_FF_TestB() {
     mat->Load(input);
     auto out = mat->Feedforward();
 
-    std::cout << mat->str(true, true, true, true, true);
+    std::cout << mat->str(true, true, true, true, true, false, false);
     
     for (size_t i = 0; i < out.size(); ++i) {
         assert(bb::repsilon(expected[i], out.at(i)));

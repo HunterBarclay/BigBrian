@@ -36,10 +36,12 @@ namespace bb {
          * @param p_data Initial data. Size must be N * M.
          */
         Matrix(uint rows, uint cols, const Real* const p_data);
-        Matrix(const Matrix& _) = delete;
+        Matrix(const Matrix& p_matrix) = delete;
         ~Matrix();
 
         const std::string str() const;
+
+        void CopyTo(Matrix& p_matrix) const;
 
         /**
          * @brief Multiply a given matrix (B) by this Matrix (A).
@@ -96,6 +98,8 @@ namespace bb {
          * @param p_func Mutation (F).
          */
         void Mutate(Real (*p_func) (Real));
+
+        void Clear();
 
         /**
          * @brief Sets all elements in the matrix. Data must be same size as the matrix.

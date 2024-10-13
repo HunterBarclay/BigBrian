@@ -21,7 +21,9 @@ void N_S_TestA() {
         2,
         layers,
         bb::LeakyReLU,
-        bb::Linear
+        bb::dLeakyReLU,
+        bb::Linear,
+        bb::dLinear
     };
     bb::Real input[] = {
         1,
@@ -38,7 +40,7 @@ void N_S_TestA() {
     network->Load(input);
     auto out = network->Feedforward();
 
-    std::cout << network->str(true, true, true, true, true);
+    std::cout << network->str(true, true, true, true, true, false, false);
 
     bb::NetworkScore score = network->Score(expected);
     
@@ -56,7 +58,9 @@ void N_S_TestB() {
         2,
         layers,
         bb::LeakyReLU,
-        bb::Linear
+        bb::dLeakyReLU,
+        bb::Linear,
+        bb::dLinear
     };
     bb::Real input[] = {
         1,
@@ -78,7 +82,7 @@ void N_S_TestB() {
     network->Load(input);
     auto out = network->Feedforward();
 
-    std::cout << network->str(true, true, true, true, true);
+    std::cout << network->str(true, true, true, true, true, false, false);
 
     bb::NetworkScore score = network->Score(expected);
     std::cout << "\t[ SCORE ]\n";

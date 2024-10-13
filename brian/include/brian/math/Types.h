@@ -18,6 +18,10 @@ namespace bb {
         return fabs(a);
     }
 
+    inline Real rsqrt(Real a) {
+        return static_cast<Real>(sqrtl(static_cast<long double>(a)));
+    }
+
     /**
      * @brief Random Real within a range.
      * 

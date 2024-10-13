@@ -2,6 +2,7 @@ set(BIGBRIAN_SOURCE
     "src/math/Matrix.cpp"
     "src/nn/Layer.cpp"
     "src/nn/Network.cpp"
+    "src/Population.cpp"
     "src/nn/ActivationFuncs.cpp"
 )
 

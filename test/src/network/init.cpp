@@ -20,7 +20,9 @@ int main(int argc, char** argv) {
         3,
         layers,
         bb::LeakyReLU,
-        bb::Linear
+        bb::dLeakyReLU,
+        bb::Linear,
+        bb::dLinear
     };
 
     auto mat = std::make_unique<bb::Network>(desc);
