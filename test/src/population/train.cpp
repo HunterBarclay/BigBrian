@@ -42,7 +42,7 @@ bb::Real o4[] = {
 
 void Train_XOR() {
     ushort layers[] = {
-        2, 3, 3, 1
+        2, 2, 2, 1
     };
     bb::NetworkDescriptor desc = {
         4,
@@ -53,12 +53,12 @@ void Train_XOR() {
         bb::dLinear
     };
     // bb::NetworkDescriptor desc = {
-    //     3,
+    //     4,
     //     layers,
     //     bb::Sigmoid,
     //     bb::dSigmoid,
-    //     bb::Sigmoid,
-    //     bb::dSigmoid
+    //     bb::Linear,
+    //     bb::dLinear
     // };
 
     bb::Population pop(1, desc);

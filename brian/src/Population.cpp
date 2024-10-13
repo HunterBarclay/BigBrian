@@ -7,7 +7,7 @@ namespace bb {
     Population::Population(const uint p_populationSize, const NetworkDescriptor p_desc): m_population(p_populationSize), m_iterations(0) {
         for (uint i = 0; i < p_populationSize; ++i) {
             auto n = std::make_shared<Network>(p_desc);
-            n->Randomize(-10, 10, -5, 5);
+            n->Randomize(-1, 1, -2, 2);
             m_population.at(i) = std::move(n);
         }
     }
@@ -31,6 +31,9 @@ namespace bb {
                     std::cout << "\nNetwork Results:\n";
                     std::cout << network->str(true, false, false, false, true, false, false);
                 }
+            }
+            if (p_verbose) {
+                std::cout << "Network:\n" << network->str(true, true, true, true, true, false, false);
             }
             network->Train(0.01);
             network->ResetTraining();
