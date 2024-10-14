@@ -94,8 +94,10 @@ namespace bb {
         this->m_prev->BackPropagate();
     }
 
-    void Layer::Train(const Real p_coef) {
+    void Layer::Train(const uint p_samples, const Real p_coef) {
         if (this->m_dWeightsAccum && this->m_dBiasesAccum) {
+            m_dWeightsAccum->Mult(1.0 / p_samples);
+            m_dBiasesAccum->Mult(1.0 / p_samples);
             for (ushort toNode = 0; toNode < this->m_toSize; ++toNode) {
                 Real bias = this->m_biases->get(toNode, 0);
                 this->m_biases->set(toNode, 0, bias - this->m_dBiasesAccum->get(toNode, 0) * p_coef);
@@ -107,7 +109,7 @@ namespace bb {
         }
 
         if (this->m_prev) {
-            this->m_prev->Train(p_coef);
+            this->m_prev->Train(p_samples, p_coef);
         }
     }
 

@@ -4,7 +4,7 @@
 
 namespace bb {
 
-    Population::Population(const uint p_populationSize, const NetworkDescriptor p_desc): m_population(p_populationSize), m_iterations(0) {
+    DeterministicPopulation::DeterministicPopulation(const uint p_populationSize, const NetworkDescriptor p_desc): m_population(p_populationSize), m_iterations(0) {
         for (uint i = 0; i < p_populationSize; ++i) {
             auto n = std::make_shared<Network>(p_desc);
             n->Randomize(-1, 1, -2, 2);
@@ -12,13 +12,13 @@ namespace bb {
         }
     }
 
-    Population::~Population() { }
+    DeterministicPopulation::~DeterministicPopulation() { }
 
-    void Population::PushSample(const DeterministicSample& p_sample) {
+    void DeterministicPopulation::PushSample(const DeterministicSample& p_sample) {
         this->m_samples.push_back(p_sample);
     }
 
-    void Population::Iterate(bool p_verbose) {
+    void DeterministicPopulation::Iterate(bool p_verbose) {
         for (auto networkIter = this->m_population.begin(); networkIter != this->m_population.end(); ++networkIter) {
             std::shared_ptr<Network> network = *networkIter;
             for (auto sampleIter = this->m_samples.begin(); sampleIter != this->m_samples.end(); ++sampleIter) {
@@ -35,12 +35,13 @@ namespace bb {
             if (p_verbose) {
                 std::cout << "Network:\n" << network->str(true, true, true, true, true, false, false);
             }
-            network->Train(0.01);
+            network->Train(this->m_samples.size(), 0.01);
             network->ResetTraining();
         }
+        this->m_iterations++;
     }
 
-    Real Population::getAverageScore() {
+    Real DeterministicPopulation::getAverageScore() {
         Real scoreAccum = 0;
         for (auto networkIter = this->m_population.begin(); networkIter != this->m_population.end(); ++networkIter) {
             std::shared_ptr<Network> network = *networkIter;

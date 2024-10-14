@@ -88,8 +88,8 @@ namespace bb {
         };
     }
 
-    void Network::Train(const Real p_coef) {
-        this->m_tail->Train(p_coef);
+    void Network::Train(const uint p_samples, const Real p_coef) {
+        this->m_tail->Train(p_samples, p_coef);
     }
 
     void Network::ResetTraining() {

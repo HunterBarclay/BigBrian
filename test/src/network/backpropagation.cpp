@@ -47,7 +47,7 @@ void N_BP_TestA() {
         printf("%5.3g,\n", *iter);
     }
     network->BackPropagate(scores);
-    network->Train(0.1);
+    network->Train(1, 0.1);
     std::cout << network->str(true, true, true, true, true, true, true);
     
     network->ResetTraining();

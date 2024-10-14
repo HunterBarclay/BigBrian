@@ -116,7 +116,7 @@ namespace bb {
          * @param p_scores Scores of each output node.
          */
         void BackPropagate(const NetworkScore& p_scores);
-        void Train(const Real p_coef);
+        void Train(const uint p_samples, const Real p_coef);
         void ResetTraining();
 
         /**
@@ -224,7 +224,7 @@ namespace bb {
         std::vector<Real> Feedforward();
         void BackPropagate(const NetworkScore& p_scores);
         NetworkScore Score(const Real* const p_expected) const;
-        void Train(const Real p_coef);
+        void Train(const uint p_samples, const Real p_coef);
         void ResetTraining();
 
         std::string str(

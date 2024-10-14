@@ -12,6 +12,10 @@
 #include <math.h>
 #include <vector>
 
+#define MAX_ITERATIONS 100000
+#define UPDATE_FREQ 1000
+#define SCORE_ACCEPTANCE_THRESHOLD static_cast<bb::Real>(0.01)
+
 bb::Real i1[] = {
     0, 0
 };
@@ -42,7 +46,7 @@ bb::Real o4[] = {
 
 void Train_XOR() {
     ushort layers[] = {
-        2, 2, 2, 1
+        2, 3, 3, 1
     };
     bb::NetworkDescriptor desc = {
         4,
@@ -61,16 +65,27 @@ void Train_XOR() {
     //     bb::dLinear
     // };
 
-    bb::Population pop(1, desc);
+    bb::DeterministicPopulation pop(1, desc);
     pop.PushSample({ input: i1, output: o1 });
     pop.PushSample({ input: i2, output: o2 });
     pop.PushSample({ input: i3, output: o3 });
     pop.PushSample({ input: i4, output: o4 });
 
     std::cout << "Initial Score: " << pop.getAverageScore() << "\n";
-    for (uint i = 0; i < 100; ++i) {
+    for (uint i = 0; i < MAX_ITERATIONS; ++i) {
         pop.Iterate(false);
-        std::cout << "Score (" << pop.getNumIterations() << "): " << pop.getAverageScore() << "\n";
+        const uint iterations = pop.getNumIterations();
+        const bb::Real score = pop.getAverageScore();
+        if (iterations % UPDATE_FREQ == 0) {
+            std::cout << "Score (" << iterations << "): " << score << "\n";
+        }
+
+        if (score <= SCORE_ACCEPTANCE_THRESHOLD) {
+            printf("=====\n");
+            printf("Acceptable score: %5.3g\n", score);
+            printf("=====\n");
+            break;
+        }
     }
 
     pop.Iterate(true);

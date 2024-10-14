@@ -20,16 +20,16 @@ namespace bb {
         const Real* const output;
     };
 
-    class Population {
+    class DeterministicPopulation {
     private:
         std::vector<std::shared_ptr<Network>> m_population;
         std::vector<DeterministicSample> m_samples;
 
         uint m_iterations;
     public:
-        Population(const uint p_populationSize, const NetworkDescriptor p_desc);
-        Population(const Population& _) = delete;
-        ~Population();
+        DeterministicPopulation(const uint p_populationSize, const NetworkDescriptor p_desc);
+        DeterministicPopulation(const DeterministicPopulation& _) = delete;
+        ~DeterministicPopulation();
 
         void PushSample(const DeterministicSample& p_sample);
         void Iterate(bool p_verbose);

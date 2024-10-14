@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <string>
+#include <cassert>
 
 namespace bb {
     /**
@@ -68,6 +69,8 @@ namespace bb {
          * @param p_out Matrix to store results in (C).
          */
         void Mult(const Matrix& p_b, Matrix& p_out) const;
+
+        void Mult(const Real p_coef);
 
         /**
          * @brief Add a given matrix (B) to this one (A).
@@ -130,6 +133,8 @@ namespace bb {
          * @param value Value to assign.
          */
         inline void set(uint row, uint col, Real value) {
+            assert(row >= 0 && row < this->m_rows);
+            assert(col >= 0 && col < this->m_cols);
             this->m_arr[row * this->m_cols + col] = value;
         }
 
@@ -141,6 +146,8 @@ namespace bb {
          * @return Selected element.
          */
         inline Real get(uint row, uint col) const {
+            assert(row >= 0 && row < this->m_rows);
+            assert(col >= 0 && col < this->m_cols);
             return this->m_arr[row * this->m_cols + col];
         }
 

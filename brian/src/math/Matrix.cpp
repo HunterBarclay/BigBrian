@@ -50,6 +50,14 @@ namespace bb {
         }
     }
 
+    void Matrix::Mult(const Real p_coef) {
+        for (uint r = 0; r < this->m_rows; ++r) {
+            for (uint c = 0; c < this->m_cols; ++c) {
+                this->set(r, c, this->get(r, c) * p_coef);
+            }
+        }
+    }
+
     std::unique_ptr<Matrix> Matrix::Add(const Matrix& p_b) const {
         auto res = std::make_unique<Matrix>(this->m_rows, p_b.m_cols);
         this->Add(p_b, *res);

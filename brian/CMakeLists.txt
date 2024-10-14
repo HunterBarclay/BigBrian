@@ -4,6 +4,7 @@ set(BIGBRIAN_SOURCE
     "src/nn/Network.cpp"
     "src/Population.cpp"
     "src/nn/ActivationFuncs.cpp"
+    "src/util/DataParser.cpp"
 )
 
 add_library(BigBrianLib
