@@ -20,10 +20,10 @@ void N_S_TestA() {
     bb::NetworkDescriptor desc = {
         2,
         layers,
-        bb::LeakyReLU,
-        bb::dLeakyReLU,
-        bb::Linear,
-        bb::dLinear
+        bb::activation::leaky_re_lu,
+        bb::activation::d_leaky_re_lu,
+        bb::activation::linear,
+        bb::activation::d_linear
     };
     bb::Real input[] = {
         1,
@@ -36,13 +36,13 @@ void N_S_TestA() {
     };
 
     auto network = std::make_unique<bb::Network>(desc);
-    network->Randomize(0, 0, -1, -1);
-    network->Load(input);
-    auto out = network->Feedforward();
+    network->randomize(0, 0, -1, -1);
+    network->load(input);
+    auto out = network->feedforward();
 
     std::cout << network->str(true, true, true, true, true, false, false);
 
-    bb::NetworkScore score = network->Score(expected);
+    bb::NetworkScore score = network->score(expected);
     
     for (auto iter = score.nodeScores.begin(); iter != score.nodeScores.end(); ++iter) {
         assert(bb::repsilon(*iter, 0.0));
@@ -57,10 +57,10 @@ void N_S_TestB() {
     bb::NetworkDescriptor desc = {
         2,
         layers,
-        bb::LeakyReLU,
-        bb::dLeakyReLU,
-        bb::Linear,
-        bb::dLinear
+        bb::activation::leaky_re_lu,
+        bb::activation::d_leaky_re_lu,
+        bb::activation::linear,
+        bb::activation::d_linear
     };
     bb::Real input[] = {
         1,
@@ -78,13 +78,13 @@ void N_S_TestB() {
     bb::Real expectedOverall = 90;
 
     auto network = std::make_unique<bb::Network>(desc);
-    network->Randomize(0, 0, -1, -1);
-    network->Load(input);
-    auto out = network->Feedforward();
+    network->randomize(0, 0, -1, -1);
+    network->load(input);
+    auto out = network->feedforward();
 
     std::cout << network->str(true, true, true, true, true, false, false);
 
-    bb::NetworkScore score = network->Score(expected);
+    bb::NetworkScore score = network->score(expected);
     std::cout << "\t[ SCORE ]\n";
     for (auto iter = score.nodeScores.begin(); iter != score.nodeScores.end(); ++iter) {
         printf("%5.3g,\n", *iter);

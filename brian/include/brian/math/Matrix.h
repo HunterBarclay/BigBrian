@@ -5,7 +5,7 @@
  * @brief NxM Matrix
  */
 
-#include "brian/math/Types.h"
+#include "brian/math/types.h"
 
 #include <memory>
 #include <string>
@@ -34,15 +34,15 @@ namespace bb {
          * 
          * @param rows Number of rows (N).
          * @param cols Number of columns (M).
-         * @param p_data Initial data. Size must be N * M.
+         * @param data Initial data. Size must be N * M.
          */
-        Matrix(uint rows, uint cols, const Real* const p_data);
-        Matrix(const Matrix& p_matrix) = delete;
+        Matrix(uint rows, uint cols, const Real* const data);
+        Matrix(const Matrix& _) = delete;
         ~Matrix();
 
         const std::string str() const;
 
-        void CopyTo(Matrix& p_matrix) const;
+        void copy_to(Matrix& matrix) const;
 
         /**
          * @brief Multiply a given matrix (B) by this Matrix (A).
@@ -50,14 +50,14 @@ namespace bb {
          * 
          * Equation -> A * B
          * 
-         * @param p_b Matrix to multiply (B).
+         * @param b Matrix to multiply (B).
          * @return Resulting matrix.
          */
-        std::unique_ptr<Matrix> Mult(const Matrix& p_b) const;
+        std::unique_ptr<Matrix> mult(const Matrix& b) const;
 
         /**
          * @brief Multiply a given matrix (B) by this Matrix (A), and store the
-         * result into p_out (C).
+         * result into out (C).
          * 
          * Equation -> C = A * B
          * 
@@ -65,65 +65,65 @@ namespace bb {
          * C's column count must match B's column count.
          * C's row count must match A's row count.
          * 
-         * @param p_b Matrix to multiply (B).
-         * @param p_out Matrix to store results in (C).
+         * @param b Matrix to multiply (B).
+         * @param out Matrix to store results in (C).
          */
-        void Mult(const Matrix& p_b, Matrix& p_out) const;
+        void mult(const Matrix& b, Matrix& out) const;
 
-        void Mult(const Real p_coef);
+        void mult(const Real p_coef);
 
         /**
          * @brief Add a given matrix (B) to this one (A).
          * 
          * Equation -> A + B
          * 
-         * @param p_b Matrix B.
+         * @param b Matrix B.
          * @return Resulting matrix.
          */
-        std::unique_ptr<Matrix> Add(const Matrix& p_b) const;
+        std::unique_ptr<Matrix> add(const Matrix& b) const;
 
         /**
          * @brief Add a given matrix (B) to this one (A), and store the
-         * result into p_out (C).
+         * result into out (C).
          * 
          * Equation -> C = A + B
          * 
-         * @param p_b Matrix B.
-         * @param p_out Matrix C.
+         * @param b Matrix B.
+         * @param out Matrix C.
          */
-        void Add(const Matrix& p_b, Matrix& p_out) const;
+        void add(const Matrix& b, Matrix& out) const;
 
         /**
          * @brief Mutate each element in the matrix (A) via given function (F).
          * 
          * Equation A_ij = F(A_ij)
          * 
-         * @param p_func Mutation (F).
+         * @param func Mutation (F).
          */
-        void Mutate(Real (*p_func) (Real));
+        void mutate(Real (*func) (Real));
 
-        void Clear();
+        void clear();
 
         /**
          * @brief Sets all elements in the matrix. Data must be same size as the matrix.
          * 
-         * @param p_data Source data.
+         * @param data Source data.
          */
-        void setAll(const Real* const p_data);
+        void set_all(const Real* const data);
 
         /**
          * @brief Gets an active reference to all elements in the matrix.
          * 
          * @return Pointer to matrix data.
          */
-        const Real* const getRef();
+        const Real* const get_ref();
 
         /**
          * @brief Gets a copy of the data in the matrix.
          * 
          * @return Pointer with copy of the matrix data.
          */
-        Real* getCopy();
+        Real* get_copy();
         
         /**
          * @brief Set element in the matrix.
@@ -156,7 +156,7 @@ namespace bb {
          * 
          * @return Number of rows.
          */
-        const inline uint getNumRows() const {
+        const inline uint get_num_rows() const {
             return this->m_rows;
         }
 
@@ -165,7 +165,7 @@ namespace bb {
          * 
          * @return Number of columns.
          */
-        const inline uint getNumCols() const {
+        const inline uint get_num_cols() const {
             return this->m_cols;
         }
     };

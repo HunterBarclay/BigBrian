@@ -9,7 +9,7 @@
 
 #include <vector>
 
-#include "brian/NN.h"
+#include "brian/nn.h"
 
 namespace bb {
     /**
@@ -27,15 +27,15 @@ namespace bb {
 
         uint m_iterations;
     public:
-        DeterministicPopulation(const uint p_populationSize, const NetworkDescriptor p_desc);
+        DeterministicPopulation(const uint populationSize, const NetworkDescriptor desc);
         DeterministicPopulation(const DeterministicPopulation& _) = delete;
         ~DeterministicPopulation();
 
-        void PushSample(const DeterministicSample& p_sample);
-        void Iterate(bool p_verbose);
-        Real getAverageScore();
+        void push_sample(const DeterministicSample& sample);
+        void iterate(bool verbose);
+        Real get_average_score();
 
-        const inline uint getNumIterations() const {
+        const inline uint get_num_iterations() const {
             return this->m_iterations;
         }
     };

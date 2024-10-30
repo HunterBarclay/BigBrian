@@ -26,14 +26,14 @@ int main(int argc, char** argv) {
     };
 
     auto matA = std::make_unique<bb::Matrix>(2, 1, a);
-    ValidateMatrix(*matA, 2, 1, a);
+    validate_matrix(*matA, 2, 1, a);
     auto matB = std::make_unique<bb::Matrix>(1, 2, b);
-    ValidateMatrix(*matB, 1, 2, b);
+    validate_matrix(*matB, 1, 2, b);
     auto matC = std::make_unique<bb::Matrix>(2, 2, cPre);
-    ValidateMatrix(*matC, 2, 2, cPre);
+    validate_matrix(*matC, 2, 2, cPre);
 
-    matA->Mult(*matB, *matC);
-    ValidateMatrix(*matC, 2, 2, cPost);
+    matA->mult(*matB, *matC);
+    validate_matrix(*matC, 2, 2, cPost);
 
     return 0;
 }

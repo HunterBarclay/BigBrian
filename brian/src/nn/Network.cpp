@@ -1,4 +1,4 @@
-#include "brian/NN.h"
+#include "brian/nn.h"
 
 #include <iostream>
 #include <ctime>
@@ -8,31 +8,31 @@
 
 namespace bb {
 
-    Network::Network(const NetworkDescriptor p_desc): m_desc(p_desc) {
+    Network::Network(const NetworkDescriptor desc): m_desc(desc) {
         std::shared_ptr<Layer> prev(nullptr);
         for (uint i = 0; i < this->m_desc.numLayers; ++i) {
             // Not sure the ternaries are the best choice here.
             std::shared_ptr<Layer> current;
-            if (i < p_desc.numLayers - 1) {
+            if (i < desc.numLayers - 1) {
                 current = std::make_shared<Layer>(
                     i,
-                    p_desc.layerSizes[i],
-                    p_desc.layerSizes[i + 1],
-                    p_desc.hiddenActivation,
-                    p_desc.dHiddenActivation
+                    desc.layerSizes[i],
+                    desc.layerSizes[i + 1],
+                    desc.hiddenActivation,
+                    desc.dHiddenActivation
                 );
             } else {
                 current = std::make_shared<Layer>(
                     i,
-                    p_desc.layerSizes[i],
+                    desc.layerSizes[i],
                     0,
-                    p_desc.outputActivation,
-                    p_desc.dOutputActivation
+                    desc.outputActivation,
+                    desc.dOutputActivation
                 );
             }
-            current->setPrev(prev);
+            current->set_prev(prev);
             if (prev) {
-                prev->setNext(current);
+                prev->set_next(current);
             } else {
                 this->m_head = current;
             }
@@ -45,109 +45,109 @@ namespace bb {
         std::cout << "Bye.\n";
     }
 
-    void Network::Randomize(const Real p_minBias, const Real p_maxBias, const Real p_minWeight, const Real p_maxWeight) {
+    void Network::randomize(const Real minBias, const Real maxBias, const Real minWeight, const Real maxWeight) {
         auto head = this->m_head;
 
         while (head) {
-            head->RandomizeBiases(p_minBias, p_maxBias);
-            head->RandomizeWeights(p_minWeight, p_maxWeight);
-            head = head->getNext();
+            head->randomize_biases(minBias, maxBias);
+            head->randomize_weights(minWeight, maxWeight);
+            head = head->get_next();
         }
     }
 
-    void Network::Load(const Real* const p_input) {
-        this->m_head->Load(p_input);
+    void Network::load(const Real* const input) {
+        this->m_head->load(input);
     }
 
-    std::vector<Real> Network::Feedforward() {
-        this->m_tail->Feedforward();
-        auto vec = std::vector<Real>((size_t)this->m_tail->getNumNodes());
-        vec.assign(this->m_tail->getNumNodes(), *this->m_tail->getNodeValues());
+    std::vector<Real> Network::feedforward() {
+        this->m_tail->feedforward();
+        auto vec = std::vector<Real>((size_t)this->m_tail->get_num_nodes());
+        vec.assign(this->m_tail->get_num_nodes(), *this->m_tail->get_node_values());
         return std::move(vec);
     }
 
-    void Network::BackPropagate(const NetworkScore& p_scores) {
-        this->m_tail->BackPropagate(p_scores);
+    void Network::back_propagate(const NetworkScore& scores) {
+        this->m_tail->back_propagate(scores);
     }
 
-    NetworkScore Network::Score(const Real* const p_expected) const {
-        std::vector<Real> nodeScores(this->m_tail->getNumNodes());
-        std::vector<Real> expected(this->m_tail->getNumNodes());
-        auto nodeValues = this->m_tail->getNodeValues();
+    NetworkScore Network::score(const Real* const expected) const {
+        std::vector<Real> nodeScores(this->m_tail->get_num_nodes());
+        std::vector<Real> expectedVec(this->m_tail->get_num_nodes());
+        auto nodeValues = this->m_tail->get_node_values();
         Real totalScore = 0;
-        for (uint i = 0; i < this->m_tail->getNumNodes(); ++i) {
-            auto score = (nodeValues[i] - p_expected[i]) * (nodeValues[i] - p_expected[i]);
-            expected.at(i) = p_expected[i];
+        for (uint i = 0; i < this->m_tail->get_num_nodes(); ++i) {
+            auto score = (nodeValues[i] - expected[i]) * (nodeValues[i] - expected[i]);
+            expectedVec.at(i) = expected[i];
             nodeScores.at(i) = score;
             totalScore += score;
         }
         return {
-            std::move(expected),
+            std::move(expectedVec),
             std::move(nodeScores),
             std::move(totalScore)
         };
     }
 
-    void Network::Train(const uint p_samples, const Real p_coef) {
-        this->m_tail->Train(p_samples, p_coef);
+    void Network::train(const uint samples, const Real coef) {
+        this->m_tail->train(samples, coef);
     }
 
-    void Network::ResetTraining() {
-        this->m_tail->ResetTraining();
+    void Network::reset_training() {
+        this->m_tail->reset_training();
     }
 
-    std::string Network::str(bool p_input, bool p_hidden, bool p_weights, bool p_biases, bool p_output, bool p_derivs, bool p_derivAccums) const {
+    std::string Network::str(bool input, bool hidden, bool weights, bool biases, bool output, bool derivs, bool derivAccums) const {
         std::stringstream ss;
 
-        if (p_input) {
+        if (input) {
             ss << "\t[ INPUT ]\n";
-            ss << this->m_head->getNodes()->str();
+            ss << this->m_head->get_nodes()->str();
         }
 
-        if (p_hidden) {
-            auto head = this->m_head->getNext();
+        if (hidden) {
+            auto head = this->m_head->get_next();
             while (head) {
-                if (p_biases) {
-                    ss << "\t[ BIASES (" << head->getLayerNum() - 1 << ") ]\n";
-                    ss << head->getPrev()->getBiases()->str();
+                if (biases) {
+                    ss << "\t[ BIASES (" << head->get_layer_num() - 1 << ") ]\n";
+                    ss << head->get_prev()->get_biases()->str();
 
-                    if (p_derivs) {
-                        ss << "\t[ Deriv BIASES (" << head->getLayerNum() - 1 << ") ]\n";
-                        ss << head->getPrev()->getDBiases()->str();
+                    if (derivs) {
+                        ss << "\t[ Deriv BIASES (" << head->get_layer_num() - 1 << ") ]\n";
+                        ss << head->get_prev()->get_d_biases()->str();
                     }
 
-                    if (p_derivAccums) {
-                        ss << "\t[ Deriv Accum BIASES (" << head->getLayerNum() - 1 << ") ]\n";
-                        ss << head->getPrev()->getDBiasesAccum()->str();
-                    }
-                }
-                if (p_weights) {
-                    ss << "\t[ WEIGHTS (" << head->getLayerNum() - 1 << ") ]\n";
-                    ss << head->getPrev()->getWeights()->str();
-
-                    if (p_derivs) {
-                        ss << "\t[ Deriv WEIGHTS (" << head->getLayerNum() - 1 << ") ]\n";
-                        ss << head->getPrev()->getDWeights()->str();
-                    }
-
-                    if (p_derivAccums) {
-                        ss << "\t[ Deriv Accum WEIGHTS (" << head->getLayerNum() - 1 << ") ]\n";
-                        ss << head->getPrev()->getDWeightsAccum()->str();
+                    if (derivAccums) {
+                        ss << "\t[ Deriv Accum BIASES (" << head->get_layer_num() - 1 << ") ]\n";
+                        ss << head->get_prev()->get_d_biases_accum()->str();
                     }
                 }
+                if (weights) {
+                    ss << "\t[ WEIGHTS (" << head->get_layer_num() - 1 << ") ]\n";
+                    ss << head->get_prev()->get_weights()->str();
 
-                if (head->getNext()) {
-                    ss << "\t[ HIDDEN (" << head->getLayerNum() << ") ]\n";
-                    ss << head->getNodes()->str();
+                    if (derivs) {
+                        ss << "\t[ Deriv WEIGHTS (" << head->get_layer_num() - 1 << ") ]\n";
+                        ss << head->get_prev()->get_d_weights()->str();
+                    }
+
+                    if (derivAccums) {
+                        ss << "\t[ Deriv Accum WEIGHTS (" << head->get_layer_num() - 1 << ") ]\n";
+                        ss << head->get_prev()->get_d_weights_accum()->str();
+                    }
                 }
 
-                head = head->getNext();
+                if (head->get_next()) {
+                    ss << "\t[ HIDDEN (" << head->get_layer_num() << ") ]\n";
+                    ss << head->get_nodes()->str();
+                }
+
+                head = head->get_next();
             }
         }
 
-        if (p_output) {
+        if (output) {
             ss << "\t[ OUTPUT ]\n";
-            ss << this->m_tail->getNodes()->str();
+            ss << this->m_tail->get_nodes()->str();
         }
 
         return ss.str();

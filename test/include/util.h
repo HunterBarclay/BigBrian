@@ -8,5 +8,5 @@
 #include <cassert>
 #include <math.h>
 
-void ValidateMatrix(const bb::Matrix& mat, const uint rows, const uint cols);
-void ValidateMatrix(const bb::Matrix& mat, const uint rows, const uint cols, const bb::Real* const data);
+void validate_matrix(const bb::Matrix& mat, const uint rows, const uint cols);
+void validate_matrix(const bb::Matrix& mat, const uint rows, const uint cols, const bb::Real* const data);

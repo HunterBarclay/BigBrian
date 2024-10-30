@@ -26,18 +26,18 @@ int main(int argc, char** argv) {
     };
 
     auto matA = std::make_unique<bb::Matrix>(3, 2, data);
-    matA->Mutate([](bb::Real r) -> bb::Real {
+    matA->mutate([](bb::Real r) -> bb::Real {
         return r + 3;
     });
     std::cout << matA->str();
-    ValidateMatrix(*matA, 3, 2, a);
+    validate_matrix(*matA, 3, 2, a);
 
     auto matB = std::make_unique<bb::Matrix>(3, 2, data);
-    matB->Mutate([](bb::Real r) -> bb::Real {
+    matB->mutate([](bb::Real r) -> bb::Real {
         return r * r;
     });
     std::cout << matA->str();
-    ValidateMatrix(*matB, 3, 2, b);
+    validate_matrix(*matB, 3, 2, b);
 
     return 0;
 }

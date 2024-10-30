@@ -27,37 +27,37 @@ namespace bb {
      * 
      * This function doesn't check for a valid range for performance.
      * 
-     * @param p_min Minimum valid allowed.
-     * @param p_max Maximum valid allowed.
+     * @param min Minimum valid allowed.
+     * @param max Maximum valid allowed.
      * @return Random value within range.
      */
-    inline Real rrand(Real p_min, Real p_max) {
-        return static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX) * (p_max - p_min) + p_min;
+    inline Real rrand(Real min, Real max) {
+        return static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX) * (max - min) + min;
     }
 
     /**
      * @brief Determine if two values are the same, given a tolerance.
      * 
-     * @param p_a Value a.
-     * @param p_b Value b.
-     * @param p_tolerance Tolerance in which they will still be considered "equal".
+     * @param a Value a.
+     * @param b Value b.
+     * @param tolerance Tolerance in which they will still be considered "equal".
      * @return true If a and b are effectively equal.
      * @return false If a and b are not equal.
      */
-    inline bool repsilon(Real p_a, Real p_b, Real p_tolerance) {
-        return rabs(p_a - p_b) < p_tolerance;
+    inline bool repsilon(Real a, Real b, Real tolerance) {
+        return rabs(a - b) < tolerance;
     }
 
     /**
      * @brief Determine if two values are the same, given a tolerance.
      * 
-     * @param p_a Value a.
-     * @param p_b Value b.
+     * @param a Value a.
+     * @param b Value b.
      * @return true If a and b are effectively equal.
      * @return false If a and b are not equal.
      */
-    inline bool repsilon(Real p_a, Real p_b) {
-        return repsilon(p_a, p_b, 0.001);
+    inline bool repsilon(Real a, Real b) {
+        return repsilon(a, b, 0.001);
     }
     
 }

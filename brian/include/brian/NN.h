@@ -13,7 +13,7 @@
  * Output Layer: Linear
  */
 
-#include "math/Matrix.h"
+#include "brian/math/matrix.h"
 
 #include <iostream>
 #include <memory>
@@ -21,11 +21,13 @@
 
 namespace bb {
 
-    Real LeakyReLU(Real a);
-    Real dLeakyReLU(Real a);
+    namespace activation {
+        Real leaky_re_lu(Real a);
+        Real d_leaky_re_lu(Real a);
 
-    Real Linear(Real a);
-    Real dLinear(Real a);
+        Real linear(Real a);
+        Real d_linear(Real a);
+    }
 
     Real Sigmoid(Real a);
     Real dSigmoid(Real a);
@@ -85,27 +87,27 @@ namespace bb {
          * @brief Back propagates through the layers, generating derivatives for
          * all inputs along the way.
          */
-        void BackPropagate();
+        void back_propagate();
     public:
         /**
          * @brief Construct a new Layer object
          *
-         * @param p_layerNum
-         * @param p_fromSize
-         * @param p_toSize
+         * @param layerNum
+         * @param fromSize
+         * @param toSize
          */
-        Layer(uint p_layerNum, ushort p_fromSize, ushort p_toSize, RActivation p_activationFunc, RActivation p_dActivationFunc);
+        Layer(uint layerNum, ushort fromSize, ushort toSize, RActivation activationFunc, RActivation dActivationFunc);
         Layer(const Layer &_) = delete;
         ~Layer();
 
         /**
          * @brief Set the value of the nodes in the layer.
          * 
-         * @param p_values Values to assign to the nodes of the layer. Must be the same
+         * @param values Values to assign to the nodes of the layer. Must be the same
          * size as the layer.
          */
-        void Load(const Real *const p_values);
-        void Feedforward();
+        void load(const Real *const p_values);
+        void feedforward();
         /**
          * @brief Back propagates through the layers, generating derivatives for
          * all inputs along the way.
@@ -115,9 +117,9 @@ namespace bb {
          * 
          * @param p_scores Scores of each output node.
          */
-        void BackPropagate(const NetworkScore& p_scores);
-        void Train(const uint p_samples, const Real p_coef);
-        void ResetTraining();
+        void back_propagate(const NetworkScore& p_scores);
+        void train(const uint p_samples, const Real p_coef);
+        void reset_training();
 
         /**
          * @brief Randomize the weights in the layer.
@@ -125,76 +127,76 @@ namespace bb {
          * Nothing happens if this is the last layer. Will fail if
          * max is less than min.
          * 
-         * @param p_min Minimum a weight can be.
-         * @param p_max Maximum a weight can be.
+         * @param min Minimum a weight can be.
+         * @param max Maximum a weight can be.
          */
-        void RandomizeWeights(const Real p_min, const Real p_max);
+        void randomize_weights(const Real min, const Real max);
 
-        void RandomizeBiases(const Real p_min, const Real p_max);
+        void randomize_biases(const Real min, const Real max);
 
-        inline const Real* const getNodeValues() const {
-            return this->m_nodes->getRef();
+        inline const Real* const get_node_values() const {
+            return this->m_nodes->get_ref();
         }
 
-        inline std::shared_ptr<Layer> getNext() const {
+        inline std::shared_ptr<Layer> get_next() const {
             return this->m_next;
         }
 
         /**
          * @brief Set the next layer.
          *
-         * @param p_next Next layer.
+         * @param next Next layer.
          */
-        inline void setNext(std::shared_ptr<Layer> p_next) {
-            this->m_next = p_next;
+        inline void set_next(std::shared_ptr<Layer> next) {
+            this->m_next = next;
         }
 
-        inline std::shared_ptr<Layer> getPrev() const {
+        inline std::shared_ptr<Layer> get_prev() const {
             return this->m_prev;
         }
 
         /**
          * @brief Set the Prev object
          *
-         * @param p_prev
+         * @param prev
          */
-        inline void setPrev(std::shared_ptr<Layer> p_prev) {
-            this->m_prev = p_prev;
+        inline void set_prev(std::shared_ptr<Layer> prev) {
+            this->m_prev = prev;
         }
 
-        inline ushort getNumNodes() const {
-            return this->m_nodes->getNumRows();
+        inline ushort get_num_nodes() const {
+            return this->m_nodes->get_num_rows();
         }
 
-        inline const std::shared_ptr<const Matrix> getNodes() const {
+        inline const std::shared_ptr<const Matrix> get_nodes() const {
             return this->m_nodes;
         }
 
-        inline const std::shared_ptr<const Matrix> getWeights() const {
+        inline const std::shared_ptr<const Matrix> get_weights() const {
             return this->m_weights;
         }
 
-        inline const std::shared_ptr<const Matrix> getBiases() const {
+        inline const std::shared_ptr<const Matrix> get_biases() const {
             return this->m_biases;
         }
 
-        inline const std::shared_ptr<const Matrix> getDWeights() const {
+        inline const std::shared_ptr<const Matrix> get_d_weights() const {
             return this->m_dWeights;
         }
 
-        inline const std::shared_ptr<const Matrix> getDBiases() const {
+        inline const std::shared_ptr<const Matrix> get_d_biases() const {
             return this->m_dBiases;
         }
 
-        inline const std::shared_ptr<const Matrix> getDWeightsAccum() const {
+        inline const std::shared_ptr<const Matrix> get_d_weights_accum() const {
             return this->m_dWeightsAccum;
         }
 
-        inline const std::shared_ptr<const Matrix> getDBiasesAccum() const {
+        inline const std::shared_ptr<const Matrix> get_d_biases_accum() const {
             return this->m_dBiasesAccum;
         }
 
-        inline const uint getLayerNum() const {
+        inline const uint get_layer_num() const {
             return this->m_layerNum;
         }
     };
@@ -213,28 +215,28 @@ namespace bb {
         /**
          * @brief Construct a new Network object
          *
-         * @param p_desc Descriptor of the network.
+         * @param desc Descriptor of the network.
          */
         Network(const NetworkDescriptor m_desc);
         Network(const Network &_) = delete;
         ~Network();
 
-        void Randomize(const Real p_minBias, const Real p_maxBias, const Real p_minWeight, const Real p_maxWeight);
-        void Load(const Real* const p_input);
-        std::vector<Real> Feedforward();
-        void BackPropagate(const NetworkScore& p_scores);
-        NetworkScore Score(const Real* const p_expected) const;
-        void Train(const uint p_samples, const Real p_coef);
-        void ResetTraining();
+        void randomize(const Real p_minBias, const Real p_maxBias, const Real p_minWeight, const Real p_maxWeight);
+        void load(const Real* const p_input);
+        std::vector<Real> feedforward();
+        void back_propagate(const NetworkScore& p_scores);
+        NetworkScore score(const Real* const p_expected) const;
+        void train(const uint p_samples, const Real p_coef);
+        void reset_training();
 
         std::string str(
-            bool p_input,
-            bool p_hidden,
-            bool p_weights,
-            bool p_biases,
-            bool p_output,
-            bool p_derivs,
-            bool p_derivAccums
+            bool input,
+            bool hidden,
+            bool weights,
+            bool biases,
+            bool output,
+            bool derivs,
+            bool derivAccums
         ) const;
     };
 }

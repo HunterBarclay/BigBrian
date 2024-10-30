@@ -13,6 +13,6 @@
 
 int main(int argc, char** argv) {
     auto mat = std::make_unique<bb::Matrix>(1, 2);
-    ValidateMatrix(*mat, 1, 2);
+    validate_matrix(*mat, 1, 2);
     return 0;
 }

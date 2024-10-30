@@ -19,10 +19,10 @@ void N_FF_TestA() {
     bb::NetworkDescriptor desc = {
         3,
         layers,
-        bb::LeakyReLU,
-        bb::dLeakyReLU,
-        bb::Linear,
-        bb::dLinear
+        bb::activation::leaky_re_lu,
+        bb::activation::d_leaky_re_lu,
+        bb::activation::linear,
+        bb::activation::d_linear
     };
     bb::Real input[] = {
         5
@@ -32,9 +32,9 @@ void N_FF_TestA() {
     };
 
     auto mat = std::make_unique<bb::Network>(desc);
-    mat->Randomize(0, 0, 1, 1);
-    mat->Load(input);
-    auto out = mat->Feedforward();
+    mat->randomize(0, 0, 1, 1);
+    mat->load(input);
+    auto out = mat->feedforward();
 
     std::cout << mat->str(true, true, true, true, true, false, false);
     
@@ -50,10 +50,10 @@ void N_FF_TestB() {
     bb::NetworkDescriptor desc = {
         2,
         layers,
-        bb::LeakyReLU,
-        bb::dLeakyReLU,
-        bb::Linear,
-        bb::dLinear
+        bb::activation::leaky_re_lu,
+        bb::activation::d_leaky_re_lu,
+        bb::activation::linear,
+        bb::activation::d_linear
     };
     bb::Real input[] = {
         1,
@@ -66,9 +66,9 @@ void N_FF_TestB() {
     };
 
     auto mat = std::make_unique<bb::Network>(desc);
-    mat->Randomize(0, 0, -1, -1);
-    mat->Load(input);
-    auto out = mat->Feedforward();
+    mat->randomize(0, 0, -1, -1);
+    mat->load(input);
+    auto out = mat->feedforward();
 
     std::cout << mat->str(true, true, true, true, true, false, false);
     

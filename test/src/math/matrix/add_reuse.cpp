@@ -31,19 +31,19 @@ int main(int argc, char** argv) {
     };
 
     auto matA = std::make_unique<bb::Matrix>(3, 2, a);
-    ValidateMatrix(*matA, 3, 2, a);
+    validate_matrix(*matA, 3, 2, a);
     auto matB = std::make_unique<bb::Matrix>(3, 2, b);
-    ValidateMatrix(*matB, 3, 2, b);
+    validate_matrix(*matB, 3, 2, b);
     auto matC = std::make_unique<bb::Matrix>(3, 2, cPre);
-    ValidateMatrix(*matC, 3, 2, cPre);
+    validate_matrix(*matC, 3, 2, cPre);
 
-    matA->Add(*matB, *matC);
+    matA->add(*matB, *matC);
     std::cout << matC->str();
-    ValidateMatrix(*matC, 3, 2, cPost);
+    validate_matrix(*matC, 3, 2, cPost);
 
-    matA->Add(*matB, *matA);
+    matA->add(*matB, *matA);
     std::cout << matA->str();
-    ValidateMatrix(*matA, 3, 2, cPost);
+    validate_matrix(*matA, 3, 2, cPost);
 
     return 0;
 }

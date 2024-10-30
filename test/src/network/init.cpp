@@ -19,10 +19,10 @@ int main(int argc, char** argv) {
     bb::NetworkDescriptor desc = {
         3,
         layers,
-        bb::LeakyReLU,
-        bb::dLeakyReLU,
-        bb::Linear,
-        bb::dLinear
+        bb::activation::leaky_re_lu,
+        bb::activation::d_leaky_re_lu,
+        bb::activation::linear,
+        bb::activation::d_linear
     };
 
     auto mat = std::make_unique<bb::Network>(desc);

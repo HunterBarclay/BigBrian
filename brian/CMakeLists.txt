@@ -1,10 +1,10 @@
 set(BIGBRIAN_SOURCE
-    "src/math/Matrix.cpp"
-    "src/nn/Layer.cpp"
-    "src/nn/Network.cpp"
-    "src/Population.cpp"
-    "src/nn/ActivationFuncs.cpp"
-    "src/util/DataParser.cpp"
+    "src/math/matrix.cpp"
+    "src/nn/layer.cpp"
+    "src/nn/network.cpp"
+    "src/population.cpp"
+    "src/nn/activation_funcs.cpp"
+    "src/util/data_parser.cpp"
 )
 
 add_library(BigBrianLib

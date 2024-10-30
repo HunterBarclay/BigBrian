@@ -26,11 +26,11 @@ int main(int argc, char** argv) {
     };
 
     auto matA = std::make_unique<bb::Matrix>(3, 2, a);
-    ValidateMatrix(*matA, 3, 2, a);
+    validate_matrix(*matA, 3, 2, a);
     auto matB = std::make_unique<bb::Matrix>(3, 2, b);
-    ValidateMatrix(*matB, 3, 2, b);
-    auto matAB = matA->Add(*matB);
-    ValidateMatrix(*matAB, 3, 2, c);
+    validate_matrix(*matB, 3, 2, b);
+    auto matAB = matA->add(*matB);
+    validate_matrix(*matAB, 3, 2, c);
 
     return 0;
 }

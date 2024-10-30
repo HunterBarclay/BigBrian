@@ -1,4 +1,4 @@
-#include "brian/math/Matrix.h"
+#include "brian/math/matrix.h"
 
 #include <cassert>
 #include <cstring>
@@ -14,78 +14,78 @@ namespace bb {
         }
     }
 
-    Matrix::Matrix(uint rows, uint cols, const Real *const p_data): m_rows(rows), m_cols(cols), m_arr(new Real[rows * cols]) {
-        memcpy(this->m_arr, p_data, sizeof(Real) * rows * cols);
+    Matrix::Matrix(uint rows, uint cols, const Real *const data): m_rows(rows), m_cols(cols), m_arr(new Real[rows * cols]) {
+        memcpy(this->m_arr, data, sizeof(Real) * rows * cols);
     }
 
     Matrix::~Matrix() {
         delete[] this->m_arr;
     }
 
-    void Matrix::CopyTo(Matrix& p_matrix) const {
-        assert(this->m_rows == p_matrix.m_rows);
-        assert(this->m_cols == p_matrix.m_cols);
-        memcpy(p_matrix.m_arr, this->m_arr, sizeof(Real) * this->m_rows * this->m_cols);
+    void Matrix::copy_to(Matrix& matrix) const {
+        assert(this->m_rows == matrix.m_rows);
+        assert(this->m_cols == matrix.m_cols);
+        memcpy(matrix.m_arr, this->m_arr, sizeof(Real) * this->m_rows * this->m_cols);
     }
 
-    std::unique_ptr<Matrix> Matrix::Mult(const Matrix& p_b) const {
-        auto res = std::make_unique<Matrix>(this->m_rows, p_b.m_cols);
-        this->Mult(p_b, *res);
+    std::unique_ptr<Matrix> Matrix::mult(const Matrix& b) const {
+        auto res = std::make_unique<Matrix>(this->m_rows, b.m_cols);
+        this->mult(b, *res);
         return std::move(res);
     }
 
-    void Matrix::Mult(const Matrix& p_b, Matrix& p_out) const {
-        assert(this->m_cols == p_b.m_rows);
-        assert(p_out.m_rows == this->m_rows);
-        assert(p_out.m_cols == p_b.m_cols);
+    void Matrix::mult(const Matrix& b, Matrix& out) const {
+        assert(this->m_cols == b.m_rows);
+        assert(out.m_rows == this->m_rows);
+        assert(out.m_cols == b.m_cols);
 
         for (uint r = 0; r < this->m_rows; ++r) {
-            for (uint c = 0; c < p_b.m_cols; ++c) {
+            for (uint c = 0; c < b.m_cols; ++c) {
                 Real elem = 0;
                 for (uint i = 0; i < this->m_cols; ++i) {
-                    elem += this->get(r, i) * p_b.get(i, c);
+                    elem += this->get(r, i) * b.get(i, c);
                 }
-                p_out.set(r, c, elem);
+                out.set(r, c, elem);
             }
         }
     }
 
-    void Matrix::Mult(const Real p_coef) {
+    void Matrix::mult(const Real coef) {
         for (uint r = 0; r < this->m_rows; ++r) {
             for (uint c = 0; c < this->m_cols; ++c) {
-                this->set(r, c, this->get(r, c) * p_coef);
+                this->set(r, c, this->get(r, c) * coef);
             }
         }
     }
 
-    std::unique_ptr<Matrix> Matrix::Add(const Matrix& p_b) const {
-        auto res = std::make_unique<Matrix>(this->m_rows, p_b.m_cols);
-        this->Add(p_b, *res);
+    std::unique_ptr<Matrix> Matrix::add(const Matrix& b) const {
+        auto res = std::make_unique<Matrix>(this->m_rows, b.m_cols);
+        this->add(b, *res);
         return std::move(res);
     }
 
-    void Matrix::Add(const Matrix& p_b, Matrix& p_out) const {
-        assert(this->m_rows == p_b.m_rows);
-        assert(this->m_rows == p_out.m_rows);
-        assert(this->m_cols == p_b.m_cols);
-        assert(this->m_cols == p_out.m_cols);
+    void Matrix::add(const Matrix& b, Matrix& out) const {
+        assert(this->m_rows == b.m_rows);
+        assert(this->m_rows == out.m_rows);
+        assert(this->m_cols == b.m_cols);
+        assert(this->m_cols == out.m_cols);
 
         for (uint r = 0; r < this->m_rows; ++r) {
             for (uint c = 0; c < this->m_cols; ++c) {
-                p_out.set(r, c, this->get(r, c) + p_b.get(r, c));
+                out.set(r, c, this->get(r, c) + b.get(r, c));
             }
         }
     }
 
-    void Matrix::Mutate(Real (*p_func) (Real)) {
+    void Matrix::mutate(Real (*func) (Real)) {
         for (uint r = 0; r < this->m_rows; ++r) {
             for (uint c = 0; c < this->m_cols; ++c) {
-                this->set(r, c, p_func(this->get(r, c)));
+                this->set(r, c, func(this->get(r, c)));
             }
         }
     }
 
-    void Matrix::Clear() {
+    void Matrix::clear() {
         for (uint r = 0; r < this->m_rows; ++r) {
             for (uint c = 0; c < this->m_cols; ++c) {
                 this->set(r, c, 0);
@@ -93,15 +93,15 @@ namespace bb {
         }
     }
 
-    void Matrix::setAll(const Real* const p_data) {
-        memcpy(this->m_arr, p_data, sizeof(Real) * this->m_rows * this->m_cols);
+    void Matrix::set_all(const Real* const data) {
+        memcpy(this->m_arr, data, sizeof(Real) * this->m_rows * this->m_cols);
     }
 
-    const Real* const Matrix::getRef() {
+    const Real* const Matrix::get_ref() {
         return this->m_arr;
     }
 
-    Real* Matrix::getCopy() {
+    Real* Matrix::get_copy() {
         auto out = (Real*) malloc(sizeof(Real) * this->m_rows * this->m_cols);
         memcpy(out, this->m_arr, sizeof(Real) * this->m_rows * this->m_cols);
         return out;
