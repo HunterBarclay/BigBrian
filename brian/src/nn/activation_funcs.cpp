@@ -22,7 +22,7 @@ namespace bb {
             return 1.0 / (1.0 + powl(E, -a));
         }
         Real d_sigmoid(Real a) {
-            return Sigmoid(a) * (1.0 - Sigmoid(a));
+            return sigmoid(a) * (1.0 - sigmoid(a));
         }
     }
 }

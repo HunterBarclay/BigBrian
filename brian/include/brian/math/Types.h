@@ -2,12 +2,17 @@
 
 #include <math.h>
 #include <cstdlib>
+#include <string>
 
 namespace bb {
     using Real = double;
     using RActivation = Real (*) (Real);
     // TODO: Deriv of activation func.
     
+    inline Real from_str(std::string str) {
+        return strtod(str.c_str(), nullptr);
+    }
+
     /**
      * @brief Absolute valid of Real.
      * 
@@ -58,6 +63,10 @@ namespace bb {
      */
     inline bool repsilon(Real a, Real b) {
         return repsilon(a, b, 0.001);
+    }
+
+    inline Real rmod(Real a, Real b) {
+        return fmod(a, b);
     }
     
 }

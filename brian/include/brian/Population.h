@@ -15,9 +15,21 @@ namespace bb {
     /**
      * @brief Sample of deterministic data including input and expected output.
      */
-    struct DeterministicSample {
-        const Real* const input;
-        const Real* const output;
+    class DeterministicSample {
+    private:
+        size_t m_numInput;
+        size_t m_numOutput;
+        Real* m_input;
+        Real* m_output;
+    public:
+        DeterministicSample(const size_t numInput, const size_t numOutput, const Real* input, const Real* output);
+        DeterministicSample(const DeterministicSample& sample);
+        ~DeterministicSample();
+
+        inline const size_t numInput() { return this->m_numInput; }
+        inline const size_t numOutput() { return this->m_numOutput; }
+        inline const Real* const input() { return this->m_input; }
+        inline const Real* const output() { return this->m_output; }
     };
 
     class DeterministicPopulation {

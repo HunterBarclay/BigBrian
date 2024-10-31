@@ -1,6 +1,8 @@
 #pragma once
 
-#include "NN.h"
-#include "math/Types.h"
-#include "math/Matrix.h"
-#include "Population.h"
+#include "brian/nn.h"
+#include "brian/math/types.h"
+#include "brian/math/matrix.h"
+#include "brian/population.h"
+#include "brian/util/data_parser.h"
+#include "brian/util/util.h"

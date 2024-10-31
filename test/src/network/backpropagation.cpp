@@ -21,10 +21,10 @@ void N_BP_TestA() {
     bb::NetworkDescriptor desc = {
         4,
         layers,
-        bb::LeakyReLU,
-        bb::dLeakyReLU,
-        bb::Linear,
-        bb::dLinear
+        bb::activation::leaky_re_lu,
+        bb::activation::d_leaky_re_lu,
+        bb::activation::linear,
+        bb::activation::d_linear
     };
     bb::Real input[] = {
         1,
@@ -37,20 +37,20 @@ void N_BP_TestA() {
     };
 
     auto network = std::make_unique<bb::Network>(desc);
-    network->Randomize(0, 0, -1, -1);
-    network->Load(input);
-    auto out = network->Feedforward();
+    network->randomize(0, 0, -1, -1);
+    network->load(input);
+    auto out = network->feedforward();
 
-    bb::NetworkScore scores = network->Score(expected);
+    bb::NetworkScore scores = network->score(expected);
     std::cout << "\t[ SCORE ]\n";
     for (auto iter = scores.nodeScores.begin(); iter != scores.nodeScores.end(); ++iter) {
         printf("%5.3g,\n", *iter);
     }
-    network->BackPropagate(scores);
-    network->Train(1, 0.1);
+    network->back_propagate(scores);
+    network->train(1, 0.1);
     std::cout << network->str(true, true, true, true, true, true, true);
     
-    network->ResetTraining();
+    network->reset_training();
     std::cout << "\n\n[ ITERATION 1 ]\n" << network->str(true, true, true, true, true, true, true);
 }
 

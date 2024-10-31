@@ -22,11 +22,11 @@ namespace bb {
 
     template<typename T>
     Optional<T> available(T value) {
-        return Optional<T>(T);
+        return Optional<T>(value);
     }
 
     template<typename T>
     Optional<T> unavailable() {
-        return Optional<T>()
+        return Optional<T>();
     }
 }

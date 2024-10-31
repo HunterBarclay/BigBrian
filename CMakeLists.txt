@@ -31,6 +31,8 @@ set(TestsToRun
     "test/src/network/backpropagation.cpp"
 
     "test/src/population/train.cpp"
+
+    "test/src/util/parser_ds_csv.cpp"
 )
 
 set(UtilSource "test/src/util.cpp")

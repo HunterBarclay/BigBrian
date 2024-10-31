@@ -15,5 +15,5 @@ namespace bb {
     } DeterministicCSVDescriptor;
 
     Optional<std::vector<DeterministicSample>> parse_deterministic_samples(const std::string& filePath);
-    Optional<std::vector<DeterministicSample>> parse_deterministic_samples(std::ifstream& stream);
+    Optional<std::vector<DeterministicSample>> parse_deterministic_samples(std::istream& stream);
 }
