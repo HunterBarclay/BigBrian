@@ -1,8 +1,5 @@
-**/.vscode/
-**/bin/
-**/.vs/
-**/obj/
-obj/
-bin/
-.vs/
 .vscode/
+build/
+.build/
+cmake-build-debug/
+.idea/
